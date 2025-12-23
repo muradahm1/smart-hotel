@@ -22,10 +22,6 @@
                 <a href="menu.html" class="nav-link">Menu</a>
                 <a href="admin.html" class="nav-link active">Admin Dashboard</a>
             </div>
-            <div class="admin-login" id="adminLogin">
-                <button class="btn btn-secondary" id="loginBtn" style="display: none;">Admin Login</button>
-                <button class="btn btn-secondary" id="logoutBtn" style="display: none;">Logout</button>
-            </div>
         </div>
     </nav>
 
@@ -258,19 +254,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../assets/js/config-public.js"></script>
     <script src="../assets/js/supabase.js"></script>
-    <script src="../assets/js/auth.js"></script>
     <script src="../assets/js/main.js"></script>
     <script src="../assets/js/admin.js"></script>
     <script src="../assets/js/reports.js"></script>
-    
-    <script>
-        // Protect admin page
-        (async () => {
-            if (await requireAuth('admin')) {
-                addLogoutButton();
-            }
-        })();
-    </script>
 
     <script>
         // Audio notification system
