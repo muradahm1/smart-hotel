@@ -7,7 +7,7 @@ src/assets/js/config.js
 *.env.development
 .env
 .env.*
-!.env.example
+.env.example
 
 # Security files
 *.key
@@ -43,6 +43,9 @@ node_modules/
 # Build outputs
 dist/
 build/
+
+# Vercel
+.vercel
 
 # Database files
 *.db
