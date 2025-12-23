@@ -6,16 +6,8 @@
     { "source": "/hostess", "destination": "/src/pages/hostess.html" },
     { "source": "/reviews", "destination": "/src/pages/reviews.html" },
     { "source": "/chef", "destination": "/src/pages/chef.html" },
-    { "source": "/login", "destination": "/src/pages/login.html" }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
-      ]
-    }
+    { "source": "/login", "destination": "/src/pages/login.html" },
+    { "source": "/table", "destination": "/src/pages/table.html" },
+    { "source": "/room", "destination": "/src/pages/room.html" }
   ]
 }
