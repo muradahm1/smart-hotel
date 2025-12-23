@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chef Dashboard | Epicure</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/src/assets/css/style.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2>RAMZ Chef</h2>
+            </div>
+            <div class="nav-menu">
+                <a href="/menu" class="nav-link">Menu</a>
+                <a href="/chef" class="nav-link active">Chef Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Audio Permission Modal -->
+    <div id="audio-permission-overlay" class="audio-permission-overlay">
+        <div class="audio-permission-modal">
+            <h2>Welcome, Chef!</h2>
+            <p>Enable sound notifications to get alerts for new orders.</p>
+            <button id="enableAudioBtn" class="btn btn-primary btn-large">Enable Sound Notifications</button>
+            <button id="skipAudioBtn" class="btn btn-secondary">Skip for now</button>
+        </div>
+    </div>
+
+    <section class="admin-section">
+        <div class="notification-area" id="notificationArea"></div>
+        
+        <div class="container">
+            <div class="admin-header">
+                <h1><i class="fas fa-utensils"></i> Kitchen Dashboard</h1>
+                <div class="chef-stats">
+                    <div class="stat-card">
+                        <h3 id="pendingOrders">0</h3>
+                        <p>Pending</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="preparingOrders">0</h3>
+                        <p>Preparing</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="completedOrders">0</h3>
+                        <p>Completed</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chef-orders-grid" id="chefOrdersGrid">
+                <!-- Orders will be loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/src/assets/js/config-public.js"></script>
+    <script src="/src/assets/js/supabase.js"></script>
+    <script src="/src/assets/js/auth.js"></script>
+    <script src="/src/assets/js/main.js"></script>
+    <script src="/src/assets/js/chef.js"></script>
+    
+    <script>
+        // Protect chef page
+        (async () => {
+            if (await requireAuth('chef')) {
+                addLogoutButton();
+            }
+        })();
+    </script>
+</body>
+</html>

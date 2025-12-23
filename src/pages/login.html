@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | RAMZ-HOTEL</title>
+    <link rel="stylesheet" href="/src/assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2>RAMZ</h2>
+            </div>
+            <div class="nav-menu">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/menu" class="nav-link">Menu</a>
+                <a href="/reviews" class="nav-link">Reviews</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="login-section">
+        <div class="container">
+            <div class="login-container">
+                <div class="login-form">
+                    <h2>Staff Login</h2>
+                    <p>Please enter your email and password</p>
+                    
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-large">Login</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/src/assets/js/config-public.js"></script>
+    <script src="/src/assets/js/supabase.js"></script>
+    <script src="/src/assets/js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+/* Mobile Menu Fixes */
+
+/* Ensure menu displays properly on mobile */
+@media (max-width: 768px) {
+    .menu-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
+        padding: 20px !important;
+    }
+    
+    .menu-item {
+        display: block !important;
+        width: 100% !important;
+        margin-bottom: 20px !important;
+    }
+    
+    .menu-loading {
+        display: block !important;
+        text-align: center !important;
+        padding: 40px 20px !important;
+    }
+    
+    .empty-state {
+        display: block !important;
+        text-align: center !important;
+        padding: 40px 20px !important;
+    }
+}
+
+/* Force Font Awesome icons to load */
+.fas, .fab, .far {
+    font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+    font-weight: 900 !important;
+    display: inline-block !important;
+}
+
+/* Fallback for missing icons */
+.fas::before, .fab::before, .far::before {
+    content: attr(data-icon) !important;
+}
+
+/* Mobile navigation fixes */
+@media (max-width: 768px) {
+    .hamburger {
+        display: block !important;
+        z-index: 1000 !important;
+    }
+    
+    .nav-menu {
+        position: fixed !important;
+        top: 0 !important;
+        right: -100% !important;
+        width: 80% !important;
+        height: 100vh !important;
+        background: rgba(26, 26, 26, 0.95) !important;
+        backdrop-filter: blur(10px) !important;
+        transition: right 0.3s ease !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+        padding-top: 80px !important;
+        z-index: 999 !important;
+    }
+    
+    .nav-menu.active {
+        right: 0 !important;
+    }
+    
+    .nav-link {
+        padding: 15px 30px !important;
+        border-bottom: 1px solid rgba(201, 180, 140, 0.2) !important;
+        width: 100% !important;
+        text-align: left !important;
+    }
+}
+
+/* Force display of menu items */
+.menu-item {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Ensure icons are visible */
+i[class*="fa-"] {
+    font-family: "Font Awesome 6 Free" !important;
+    font-weight: 900 !important;
+    font-style: normal !important;
+    display: inline-block !important;
+    text-rendering: auto !important;
+    -webkit-font-smoothing: antialiased !important;
+}

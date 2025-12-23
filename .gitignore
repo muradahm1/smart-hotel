@@ -1,0 +1,50 @@
+# Sensitive configuration files
+assets/js/config.js
+src/assets/js/config.js
+*.env
+*.env.local
+*.env.production
+*.env.development
+.env
+.env.*
+!.env.example
+
+# Security files
+*.key
+*.pem
+*.p12
+*.pfx
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+
+# Node modules (if using npm)
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3

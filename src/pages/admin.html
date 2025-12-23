@@ -1,0 +1,350 @@
+<!-- Smart Restaurant System | by Assistant -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.cdnfonts.com; font-src *; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; media-src 'self';">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>Admin Dashboard | RAMZ</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/src/assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2>RAMZ Admin</h2>
+            </div>
+            <div class="nav-menu">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/menu" class="nav-link">Menu</a>
+                <a href="/admin" class="nav-link active">Admin Dashboard</a>
+            </div>
+            <div class="admin-login" id="adminLogin">
+                <button class="btn btn-secondary" id="loginBtn" style="display: none;">Admin Login</button>
+                <button class="btn btn-secondary" id="logoutBtn" style="display: none;">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Audio Permission Modal -->
+    <div id="audio-permission-overlay" class="audio-permission-overlay">
+        <div class="audio-permission-modal">
+            <h2>Welcome, Admin!</h2>
+            <p>Enable sound notifications to get alerts for new orders and updates.</p>
+            <button id="enableAudioBtn" class="btn btn-primary btn-large">Enable Sound Notifications</button>
+            <button id="skipAudioBtn" class="btn btn-secondary">Skip for now</button>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <section class="admin-section">
+        <!-- Notification Area -->
+        <div class="notification-area" id="notificationArea"></div>
+
+        <div class="container" id="dashboard-content">
+            <!-- Admin Navigation -->
+            <div class="admin-nav">
+                <button class="nav-btn active" onclick="showSection('orders')">Orders</button>
+                <button class="nav-btn" onclick="showSection('analytics')">Analytics</button>
+                <button class="nav-btn" onclick="showSection('menu')">Menu Management</button>
+            </div>
+            
+            <!-- Orders Section -->
+            <div id="ordersSection" class="admin-section-content">
+            <div class="admin-header">
+                <h1>Order Dashboard</h1>
+                <div class="admin-stats">
+                    <div class="stat-card">
+                        <h3 id="pendingOrders">0</h3>
+                        <p>Pending</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="preparingOrders">0</h3>
+                        <p>Preparing</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="avgServeTime">0 min</h3>
+                        <p>Avg Serve Time</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders Grid -->
+            <div class="orders-grid" id="ordersGrid">
+                <!-- Orders will be loaded here -->
+            </div>
+            </div>
+
+            <!-- Analytics Section -->
+            <div id="analyticsSection" class="admin-section-content" style="display: none;">
+            <!-- Reports & Analytics Section -->
+            <div class="admin-header" style="margin-top: 4rem; display: flex; justify-content: space-between; align-items: center;">
+                <h1><i class="fas fa-chart-line"></i> Reports & Analytics Dashboard</h1>
+                <div class="date-filter">
+                    <select id="dateRange">
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month" selected>This Month</option>
+                        <option value="year">This Year</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Key Metrics -->
+            <div class="admin-stats" id="analyticsStats">
+                <div class="stat-card">
+                    <h3 id="totalRevenue">$0.00</h3>
+                    <p>Total Revenue</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="totalOrders">0</h3>
+                    <p>Total Orders</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="avgOrderValue">$0.00</h3>
+                    <p>Avg. Order Value</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="avgFoodServeTime">0 min</h3>
+                    <p>Avg Food Serve Time</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="avgMenuServeTime">0 min</h3>
+                    <p>Avg Menu Serve Time</p>
+                </div>
+            </div>
+
+            <!-- Charts Row 1 -->
+            <div class="charts-row">
+                <div class="chart-container">
+                    <h3><i class="fas fa-chart-line"></i> Sales Over Time</h3>
+                    <canvas id="salesOverTimeChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Charts Row 2 -->
+            <div class="charts-row">
+                <div class="chart-container" style="flex: 2;">
+                    <h3><i class="fas fa-chart-bar"></i> Top Selling Menu Items</h3>
+                    <canvas id="topItemsChart"></canvas>
+                </div>
+                <div class="chart-container" style="flex: 1;">
+                    <h3><i class="fas fa-clock"></i> Average Serve Time by Category</h3>
+                    <canvas id="serveTimeChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Detailed Tables -->
+            <div class="reports-tables">
+                <div class="table-container">
+                    <h3><i class="fas fa-table"></i> Recent Orders</h3>
+                    <div class="table-wrapper">
+                        <table id="ordersTable">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Table</th>
+                                    <th>Customer</th>
+                                    <th>Items</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersTableBody">
+                                <!-- Orders will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <h3><i class="fas fa-utensils"></i> Menu Performance & Serve Times</h3>
+                    <div class="table-wrapper">
+                        <table id="menuPerformanceTable">
+                            <thead>
+                                <tr>
+                                    <th>Item Name</th>
+                                    <th>Category</th>
+                                    <th>Orders</th>
+                                    <th>Revenue</th>
+                                    <th>Avg Serve Time</th>
+                                </tr>
+                            </thead>
+                            <tbody id="menuPerformanceTableBody">
+                        
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+            <div id="menuSection" class="admin-section-content" style="display: none;">
+            <div class="admin-header" style="margin-top: 4rem;">
+                <h1>Menu Management</h1>
+                <button class="btn btn-primary" id="showAddItemForm">Add New Item</button>
+            </div>
+
+            <div class="menu-item-form-container" id="menuItemFormContainer" style="display: none;">
+                <form id="menuItemForm">
+                    <h3 id="formTitle">Add New Menu Item</h3>
+                    <input type="hidden" id="menuItemId">
+                    <div class="form-group">
+                        <label for="itemName">Name</label>
+                        <input type="text" id="itemName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="itemDescription">Description</label>
+                        <textarea id="itemDescription" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label for="itemPrice">Price</label>
+                            <input type="number" id="itemPrice" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="itemCategory">Category</label>
+                            <select id="itemCategory" required>
+                                <option value="starters">Starters & Appetizers</option>
+                                <option value="international">International Cuisine</option>
+                                <option value="traditional">Traditional Specialties</option>
+                                <option value="fasting">Fasting & Healthy Options</option>
+                                <option value="desserts">Desserts & Sweets</option>
+                                <option value="beverages">Beverages & Drinks</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="itemImage">Image</label>
+                        <div class="image-input-options">
+                            <input type="url" id="itemImageUrl" placeholder="Enter image URL" style="width: 100%; margin-bottom: 10px;">
+                            <span>or</span>
+                            <select id="itemImagePreset">
+                                <option value="">Choose preset image</option>
+                                <option value="https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400">Burger</option>
+                                <option value="https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400">Pizza</option>
+                                <option value="https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400">Salad</option>
+                                <option value="https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=400">Pasta</option>
+                                <option value="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400">Pancakes</option>
+                                <option value="https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400">Drink</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group-checkbox">
+                        <input type="checkbox" id="itemIsAvailable" checked>
+                        <label for="itemIsAvailable">Item is Available</label>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="submit" class="btn btn-primary">Save Item</button>
+                        <button type="button" class="btn btn-secondary" id="cancelEdit">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Menu Items Grid -->
+            <div class="menu-management-grid" id="menuManagementGrid">
+                <!-- Menu items for admin will be loaded here -->
+            </div>
+            </div>
+        </div>
+
+
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/src/assets/js/config-public.js"></script>
+    <script src="/src/assets/js/supabase.js"></script>
+    <script src="/src/assets/js/auth.js"></script>
+    <script src="/src/assets/js/main.js"></script>
+    <script src="/src/assets/js/admin.js"></script>
+    <script src="/src/assets/js/reports.js"></script>
+    
+    <script>
+        // Protect admin page
+        (async () => {
+            if (await requireAuth('admin')) {
+                addLogoutButton();
+            }
+        })();
+    </script>
+
+    <script>
+        // Audio notification system
+        let audioContext;
+        let audioEnabled = false;
+
+        // Initialize audio permission on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const audioOverlay = document.getElementById('audio-permission-overlay');
+            const enableBtn = document.getElementById('enableAudioBtn');
+            const skipBtn = document.getElementById('skipAudioBtn');
+            
+            // Check if user has already made a choice
+            const audioChoice = localStorage.getItem('adminAudioEnabled');
+            if (audioChoice === 'true') {
+                audioOverlay.style.display = 'none';
+                initAudio();
+            } else if (audioChoice === 'false') {
+                audioOverlay.style.display = 'none';
+            } else {
+                audioOverlay.style.display = 'flex';
+            }
+            
+            enableBtn.addEventListener('click', function() {
+                localStorage.setItem('adminAudioEnabled', 'true');
+                audioOverlay.style.display = 'none';
+                initAudio();
+            });
+            
+            skipBtn.addEventListener('click', function() {
+                localStorage.setItem('adminAudioEnabled', 'false');
+                audioOverlay.style.display = 'none';
+            });
+        });
+
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                audioEnabled = true;
+                console.log('Audio context initialized for Admin');
+            } catch (e) {
+                console.error('Web Audio API not supported', e);
+            }
+        }
+
+        function playNotificationSound() {
+            if (!audioEnabled || !audioContext) {
+                console.log('Audio not enabled');
+                return;
+            }
+
+            // Create high-pitched notification sound
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(1000, audioContext.currentTime);
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.1);
+            oscillator.frequency.setValueAtTime(1000, audioContext.currentTime + 0.2);
+            
+            gainNode.gain.setValueAtTime(0.7, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+            
+            console.log('Admin notification sound played');
+        }
+    </script>
+</body>
+</html>

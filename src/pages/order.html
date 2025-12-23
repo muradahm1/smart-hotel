@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.cdnfonts.com; font-src *; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; media-src 'self';">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>Order | RAMZ</title>
+    <link rel="stylesheet" href="/src/assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2>RAMZ</h2>
+            </div>
+            <div class="nav-menu">
+                <a href="/" class="nav-link" data-translate="nav_home">Home</a>
+                <a href="/menu" class="nav-link" data-translate="nav_menu">Menu</a>
+                <a href="/reviews" class="nav-link" data-translate="nav_reviews">Reviews</a>
+            </div>
+            <div class="nav-language">
+                <select onchange="setStoredLanguage(this.value)">
+                    <option value="en">English</option>
+                    <option value="am">አማርኛ</option>
+                    <option value="om">Oromoo</option>
+                </select>
+            </div>
+            <div class="nav-cart">
+                <a href="/order" class="cart-btn">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count">0</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Order Section -->
+    <section class="order-section">
+        <div class="container">
+            <div class="order-header">
+                <h2 class="section-title" data-translate="order_title">Your Order</h2>
+                <div class="table-info">
+                    <label for="tableNumber" data-translate="order_table_label">Table Number:</label>
+                    <input type="number" id="tableNumber" min="1" max="20" placeholder="Enter table number" data-translate-placeholder="order_table_placeholder">
+                </div>
+            </div>
+
+            <div class="order-content">
+                <div class="order-items" id="orderItems">
+                    <!-- Order items will be loaded here -->
+                </div>
+
+                <div class="order-summary" id="orderSummary">
+                    <!-- Order summary will be loaded here -->
+                </div>
+
+                <div class="customer-info">
+                    <h3 data-translate="order_customer_info_title">Customer Information</h3>
+                    <div class="form-group">
+                        <label for="customerName" data-translate="order_customer_name_label">Name:</label>
+                        <input type="text" id="customerName" placeholder="Your name" data-translate-placeholder="order_customer_name_placeholder">
+                    </div>
+                    <div class="form-group">
+                        <label for="customerPhone" data-translate="order_customer_phone_label">Phone:</label>
+                        <input type="tel" id="customerPhone" placeholder="Your phone number" data-translate-placeholder="order_customer_phone_placeholder">
+                    </div>
+                    <div class="form-group">
+                        <label for="orderNotes" data-translate="order_notes_label">Special Notes:</label>
+                        <textarea id="orderNotes" placeholder="Any special requests..." data-translate-placeholder="order_notes_placeholder"></textarea>
+                    </div>
+                </div>
+
+                <div class="payment-methods">
+                    <h3>Payment Method</h3>
+                    <div class="payment-options">
+
+                        <label class="payment-option">
+                            <input type="radio" name="paymentMethod" value="telebirr">
+                            <div class="payment-card">
+                                <i class="fas fa-mobile-alt"></i>
+                                <span>Telebirr</span>
+                            </div>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="paymentMethod" value="cbe">
+                            <div class="payment-card">
+                                <i class="fas fa-university"></i>
+                                <span>CBE Birr</span>
+                            </div>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="paymentMethod" value="bank">
+                            <div class="payment-card">
+                                <i class="fas fa-credit-card"></i>
+                                <span>Bank Transfer</span>
+                            </div>
+                        </label>
+                    </div>
+                    
+                    <!-- Payment Details -->
+                    <div class="payment-details" id="paymentDetails" style="display: none;">
+                        <div class="payment-info">
+                            <h4>Payment Information</h4>
+                            <div class="account-details">
+                                <div class="account-item">
+                                    <strong>Account Name:</strong> <span id="accountName">RAMZ Hotel</span>
+                                </div>
+                                <div class="account-item">
+                                    <strong>Account Number:</strong> <span id="accountNumber"></span>
+                                </div>
+                                <div class="account-item">
+                                    <strong>Total Amount:</strong> <span id="paymentAmount" class="amount"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="placeOrderBtn" class="btn btn-primary btn-large" data-translate="order_place_order_button">Place Order</button>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/src/assets/js/config-public.js"></script>
+    <script src="/src/assets/js/supabase.js"></script>
+    <script src="/src/assets/js/translation.js"></script>
+    <script src="/src/assets/js/order.js"></script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+/* Enhanced UI Styles for RAMZ Restaurant */
+
+/* Enhanced CTA Button */
+.btn-enhanced {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #c9b48c 0%, #d4af37 100%);
+    border: 2px solid #d4af37;
+    box-shadow: 0 8px 32px rgba(212, 175, 55, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn-enhanced:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(212, 175, 55, 0.5);
+    background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+}
+
+.btn-enhanced .btn-glow {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+.btn-enhanced:hover .btn-glow {
+    left: 100%;
+}
+
+.btn-enhanced .btn-text {
+    position: relative;
+    z-index: 2;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+/* Glassmorphism Badges */
+.badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    z-index: 3;
+}
+
+.badge-bestseller {
+    background: rgba(212, 175, 55, 0.9);
+    color: #1a1a1a;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+}
+
+.badge-healthy {
+    background: rgba(46, 204, 113, 0.9);
+    color: white;
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+}
+
+/* Enhanced Featured Cards */
+.featured-card-magical {
+    position: relative;
+    background: rgba(42, 42, 42, 0.8);
+    border-radius: 20px;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    border: 1px solid rgba(201, 180, 140, 0.2);
+}
+
+.featured-card-magical:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 60px rgba(212, 175, 55, 0.3);
+    border-color: rgba(201, 180, 140, 0.5);
+}
+
+.featured-card-magical::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+}
+
+.featured-card-magical:hover::before {
+    opacity: 1;
+}
+
+.featured-card-image {
+    position: relative;
+    overflow: hidden;
+    border-radius: 20px 20px 0 0;
+}
+
+.featured-card-image img {
+    transition: transform 0.4s ease;
+}
+
+.featured-card-magical:hover .featured-card-image img {
+    transform: scale(1.05);
+}
+
+/* Enhanced Typography */
+.featured-card h3 {
+    background: linear-gradient(135deg, #c9b48c, #d4af37);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin: 20px 0 10px;
+}
+
+.featured-card p {
+    color: #b8b8b8;
+    line-height: 1.6;
+    font-style: italic;
+    padding: 0 20px 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .gallery-item {
+        flex: 0 0 250px;
+        height: 150px;
+    }
+    
+    .badge {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+        top: 8px;
+        right: 8px;
+    }
+    
+    .featured-card-magical:hover {
+        transform: translateY(-5px);
+    }
+}
+
+@media (max-width: 480px) {
+    .gallery-item {
+        flex: 0 0 200px;
+        height: 120px;
+    }
+    
+    .btn-enhanced {
+        padding: 12px 24px;
+        font-size: 0.9rem;
+    }
+}

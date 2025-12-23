@@ -1,0 +1,239 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.cdnfonts.com; font-src *; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; media-src 'self';">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <title>RAMZ-HOTEL | Modern Dining Experience</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <link rel="stylesheet" href="src/assets/css/style.css">
+    <link rel="stylesheet" href="src/assets/css/banner.css">
+    <link rel="stylesheet" href="src/assets/css/chef-recommendation.css">
+    <link rel="stylesheet" href="src/assets/css/enhanced-ui.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2>RAMZ</h2>
+            </div>
+            <div class="nav-menu">
+                <a href="/" class="nav-link active" data-translate="nav_home">Home</a>
+                <a href="/menu" class="nav-link" data-translate="nav_menu">Menu</a>
+                <a href="/reviews" class="nav-link" data-translate="nav_reviews">Reviews</a>
+            </div>
+            <div class="nav-language">
+                <select id="languageSelect">
+                    <option value="en">English</option>
+                    <option value="am">አማርኛ</option>
+                    <option value="om">Oromoo</option>
+                </select>
+            </div>
+            <div class="nav-cart">
+                <a href="/order" class="cart-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shopping-bag">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                    <span class="cart-count">0</span>
+                </a>
+            </div>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero hero-home">
+        <div class="hero-content">
+            <h1 class="hero-title" data-translate="hero_title">Exceptional Dining Experience</h1>
+            <p class="hero-subtitle" data-translate="hero_subtitle">Where culinary artistry meets modern elegance</p>
+            <div class="hero-buttons">
+                <a href="/menu" class="btn btn-primary btn-large btn-enhanced" data-translate="view_menu_button">
+                    <span class="btn-text">View Our Menu</span>
+                    <span class="btn-glow"></span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="featured-dishes-section chef-recommendations-container chef-recommendations-glow">
+        <div class="container">
+            <div class="chef-title-spectacular fade-in-up">
+                <div class="chef-hat-container">
+                    <div class="chef-hat">👨‍🍳</div>
+                </div>
+                <h2 class="chef-title-main" data-translate="chef_recommendations">Chef's Spectacular Recommendations</h2>
+                <div class="sparkle-container">
+                    <div class="sparkle"></div>
+                    <div class="sparkle"></div>
+                    <div class="sparkle"></div>
+                    <div class="sparkle"></div>
+                </div>
+                <div class="magic-wand">🪄</div>
+                <div class="star-burst">
+                    <div class="star">⭐</div>
+                    <div class="star">⭐</div>
+                    <div class="star">⭐</div>
+                    <div class="star">⭐</div>
+                    <div class="star">⭐</div>
+                    <div class="star">⭐</div>
+                    <div class="star">⭐</div>
+                    <div class="star">⭐</div>
+                </div>
+            </div>
+            
+            <div class="golden-particles">
+                <div class="particle-gold"></div>
+                <div class="particle-gold"></div>
+                <div class="particle-gold"></div>
+                <div class="particle-gold"></div>
+                <div class="particle-gold"></div>
+            </div>
+            
+            <div class="featured-grid">
+                <!-- Featured Dish 1 -->
+                <div class="featured-card featured-card-magical fade-in-up stagger-1 float pulse-glow">
+                    <div class="featured-card-image">
+                        <img src="src/assets/images/hero1.jpg" alt="Oreo Shake" loading="lazy">
+                        <div class="badge badge-bestseller">Bestseller</div>
+                    </div>
+                    <h3 data-translate="oreo_shake_title">OREO SHAKE</h3>
+                    <p data-translate="oreo_shake_desc">A velvet blend of vanilla cream and crushed cookies, crowned with whipped perfection</p>
+                </div>
+                
+                <!-- Featured Dish 2 -->
+                <div class="featured-card featured-card-magical fade-in-up stagger-2 float pulse-glow">
+                    <div class="featured-card-image">
+                        <img src="src/assets/images/hero2.jpg" alt="Strawberry Shake" loading="lazy">
+                        <div class="badge badge-healthy">Healthy Choice</div>
+                    </div>
+                    <h3 data-translate="strawberry_shake_title">STRAWBERRY SHAKE</h3>
+                    <p data-translate="strawberry_shake_desc">Fresh garden strawberries blended into silky smoothness, a chef's signature creation</p>
+                </div>
+                
+                <!-- Featured Dish 3 -->
+                <div class="featured-card featured-card-magical fade-in-up stagger-3 float pulse-glow">
+                    <div class="featured-card-image">
+                        <img src="src/assets/images/hero3.jpg" alt="Protein Shake" loading="lazy">
+                        <div class="badge badge-healthy">Healthy Choice</div>
+                    </div>
+                    <h3 data-translate="protein_shake_title">PROTEIN SHAKE</h3>
+                    <p data-translate="protein_shake_desc">Premium protein blend crafted for peak performance, your body's perfect fuel</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Divider -->
+    <div class="section-divider"></div>
+
+    <!-- About Section -->
+    <section class="about-section">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-image horizontal-gallery fade-in-left">
+                    <div class="gallery-overlay"></div>
+                    <div class="gallery-container">
+                        <div class="gallery-track infinite-scroll">
+                            <div class="gallery-item">
+                                <img src="src/assets/images/hero1.jpg" alt="Happy Customers" loading="lazy">
+                            </div>
+                            <div class="gallery-item">
+                                <img src="src/assets/images/hero2.jpg" alt="Dining Experience" loading="lazy">
+                            </div>
+                            <div class="gallery-item">
+                                <img src="src/assets/images/hero3.jpg" alt="Restaurant Atmosphere" loading="lazy">
+                            </div>
+                            <div class="gallery-item">
+                                <img src="https://images.unsplash.com/photo-1551218808-94e220e084d2?ixlib=rb-4.0.3" alt="Customer Satisfaction" loading="lazy">
+                            </div>
+                            <!-- Duplicate for seamless loop -->
+                            <div class="gallery-item">
+                                <img src="src/assets/images/hero1.jpg" alt="Happy Customers" loading="lazy">
+                            </div>
+                            <div class="gallery-item">
+                                <img src="src/assets/images/hero2.jpg" alt="Dining Experience" loading="lazy">
+                            </div>
+                            <div class="gallery-item">
+                                <img src="src/assets/images/hero3.jpg" alt="Restaurant Atmosphere" loading="lazy">
+                            </div>
+                            <div class="gallery-item">
+                                <img src="https://images.unsplash.com/photo-1551218808-94e220e084d2?ixlib=rb-4.0.3" alt="Customer Satisfaction" loading="lazy">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-text fade-in-right">
+                    <h2 data-translate="our_story_title">Our Story</h2>
+                    <p data-translate="our_story_p1">RAMZ-HOTEL redefines modern dining with a perfect blend of traditional techniques and innovative flavors. Our chefs craft each dish with precision and passion, using only the finest locally-sourced ingredients.</p>
+                    <p data-translate="our_story_p2">Experience the future of restaurant service with our seamless digital ordering system, designed to enhance your dining journey while maintaining the warmth of traditional hospitality.</p>
+                </div>
+            </div>
+            <div class="about-stats-container fade-in-up stagger-2">
+                <div class="about-stats">
+                    <div class="stat">
+                        <h3>50+</h3>
+                        <p data-translate="stat_menu_items">Menu Items</p>
+                    </div>
+                    <div class="stat">
+                        <h3>15</h3>
+                        <p data-translate="stat_tables">Tables</p>
+                    </div>
+                    <div class="stat">
+                        <h3>4.9★</h3>
+                        <p data-translate="stat_rating">Rating</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+             <div class="footer-social">
+                    <h4 data-translate="footer_follow_us">Follow Us</h4>
+                    <div class="social-icons">
+                        <a href="#" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="#" target="_blank" class="social-icon"><i class="fab fa-tiktok"></i></a>
+                        <a href="#" target="_blank" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                    </div>
+                </div>
+                <div class="footer-hours">
+                    <h4 data-translate="footer_hours">Hours</h4>
+                    <p data-translate="footer_hours_mon_thu">Monday - Thursday: 5PM - 10PM</p>
+                    <p data-translate="footer_hours_fri_sun">Friday - Sunday: 5PM - 11PM</p>
+                </div>
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h3>RAMZ-HOTEL</h3>
+                    <p>123 ADAMA<br>postoffice </p>
+                    <p>RAMZ-HOTEL.com<br>() 123-4567</p>
+                </div>
+                
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="src/assets/js/config.js"></script>
+    <script src="src/assets/js/supabase.js"></script>
+    <script src="src/assets/js/translation.js"></script>
+    <script src="src/assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+/menu /src/pages/menu.html 200
+/order /src/pages/order.html 200
+/reviews /src/pages/reviews.html 200
+/admin /src/pages/admin.html 200
+/chef /src/pages/chef.html 200
+/hostess /src/pages/hostess.html 200
+/login /src/pages/login.html 200
+/table /src/pages/table.html 200
+/room /src/pages/room.html 200

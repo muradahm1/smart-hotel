@@ -1,0 +1,179 @@
+<!-- Smart Restaurant System | by Assistant -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.cdnfonts.com; font-src *; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; media-src 'self';">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>Waiters Dashboard | RAMZ</title>
+    <link rel="stylesheet" href="/src/assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2>RAMZ Waiters</h2>
+            </div>
+            <div class="nav-menu">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/menu" class="nav-link">Menu</a>
+                <a href="/chef" class="nav-link">Chef</a>
+                <a href="/admin" class="nav-link">Admin</a>
+                <a href="/hostess" class="nav-link active">Waiters</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Audio Permission Modal -->
+    <div id="audio-permission-overlay" class="audio-permission-overlay">
+        <div class="audio-permission-modal">
+            <h2>Welcome, Waiters!</h2>
+            <p>Enable sound notifications to get alerts for ready orders.</p>
+            <button id="enableAudioBtn" class="btn btn-primary btn-large">Enable Sound Notifications</button>
+            <button id="skipAudioBtn" class="btn btn-secondary">Skip for now</button>
+        </div>
+    </div>
+
+    <!-- Hostess Dashboard -->
+    <section class="admin-section">
+        <!-- Notification Area -->
+        <div class="notification-area" id="notificationArea"></div>
+
+        <div class="container" id="dashboard-content">
+            <div class="admin-header">
+                <h1><i class="fas fa-concierge-bell"></i> Waiters Dashboard</h1>
+                <div class="admin-stats">
+                    <div class="stat-card">
+                        <h3 id="pendingOrders">0</h3>
+                        <p>New Orders</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="preparingOrders">0</h3>
+                        <p>In Kitchen</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="readyOrders">0</h3>
+                        <p>Ready for Pickup</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders Grid -->
+            <div class="chef-orders-grid" id="ordersGrid">
+                <div class="empty-state">Loading orders...</div>
+                <!-- Orders will be loaded here -->
+            </div>
+        </div>
+
+
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 RAMZ. Waiters Dashboard.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/src/assets/js/config-public.js"></script>
+    <script src="/src/assets/js/supabase.js"></script>
+    <script src="/src/assets/js/auth.js"></script>
+    <script src="/src/assets/js/main.js"></script>
+    <script src="/src/assets/js/hostess.js"></script>
+    
+    <script>
+        // Protect hostess page
+        (async () => {
+            if (await requireAuth('hostess')) {
+                addLogoutButton();
+            }
+        })();
+    </script>
+
+    <script>
+        // Audio notification system for hostess
+        let audioContext;
+        let audioEnabled = false;
+
+        // Initialize audio permission on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const audioOverlay = document.getElementById('audio-permission-overlay');
+            const enableBtn = document.getElementById('enableAudioBtn');
+            const skipBtn = document.getElementById('skipAudioBtn');
+            
+            // Check if user has already made a choice
+            const audioChoice = localStorage.getItem('waitersAudioEnabled');
+            if (audioChoice === 'true') {
+                audioOverlay.style.display = 'none';
+                initAudio();
+            } else if (audioChoice === 'false') {
+                audioOverlay.style.display = 'none';
+            } else {
+                audioOverlay.style.display = 'flex';
+            }
+            
+            enableBtn.addEventListener('click', function() {
+                localStorage.setItem('waitersAudioEnabled', 'true');
+                audioOverlay.style.display = 'none';
+                initAudio();
+            });
+            
+            skipBtn.addEventListener('click', function() {
+                localStorage.setItem('waitersAudioEnabled', 'false');
+                audioOverlay.style.display = 'none';
+            });
+        });
+
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                audioEnabled = true;
+                console.log('Audio context initialized for Waiters');
+            } catch (e) {
+                console.error('Web Audio API not supported', e);
+            }
+        }
+
+        async function playNotificationSound() {
+            if (!audioEnabled || !audioContext) {
+                console.log('Audio not enabled');
+                return;
+            }
+
+            try {
+                // Resume audio context if suspended
+                if (audioContext.state === 'suspended') {
+                    await audioContext.resume();
+                }
+
+                // Create bell-like notification sound
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(1000, audioContext.currentTime + 0.1);
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.2);
+                
+                gainNode.gain.setValueAtTime(0.6, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.4);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.4);
+                
+                console.log('Waiters notification sound played');
+            } catch (error) {
+                console.error('Error playing waiters notification sound:', error);
+            }
+        }
+    </script>
+</body>
+</html>
