@@ -1,14 +1,15 @@
 {
-  "cleanUrls": true,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/menu", "destination": "/src/pages/menu.html" },
-    { "source": "/admin", "destination": "/src/pages/admin.html" },
-    { "source": "/order", "destination": "/src/pages/order.html" },
-    { "source": "/hostess", "destination": "/src/pages/hostess.html" },
-    { "source": "/reviews", "destination": "/src/pages/reviews.html" },
-    { "source": "/chef", "destination": "/src/pages/chef.html" },
-    { "source": "/login", "destination": "/src/pages/login.html" },
-    { "source": "/table", "destination": "/src/pages/table.html" },
-    { "source": "/room", "destination": "/src/pages/room.html" }
+    { "source": "/menu", "destination": "/menu.html" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/order", "destination": "/order.html" },
+    { "source": "/hostess", "destination": "/hostess.html" },
+    { "source": "/reviews", "destination": "/reviews.html" },
+    { "source": "/chef", "destination": "/chef.html" },
+    { "source": "/login", "destination": "/login.html" },
+    { "source": "/table", "destination": "/table.html" },
+    { "source": "/room", "destination": "/room.html" }
   ]
 }
