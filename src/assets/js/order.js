@@ -449,12 +449,22 @@ async function submitConfirmedOrder() {
     closeConfirmationModal();
 
     try {
+        // Wait for Supabase client to be ready
+        let attempts = 0;
+        while (!window.supabaseClient && attempts < 20) {
+            await new Promise(resolve => setTimeout(resolve, 200));
+            attempts++;
+        }
+
+        if (!window.supabaseClient) {
+            throw new Error('Database connection not available');
+        }
         // Get location info from localStorage
         const locationInfo = JSON.parse(localStorage.getItem('currentLocation') || '{}');
         const fromQR = localStorage.getItem('ramzFromQR') === 'true';
         
         // Create order
-        const { data: order, error: orderError } = await supabase
+        const { data: order, error: orderError } = await window.supabaseClient
             .from('orders')
             .insert([{
                 table_number: parseInt(orderData.tableNumber),
@@ -481,7 +491,7 @@ async function submitConfirmedOrder() {
             price: item.price
         }));
 
-        const { error: itemsError } = await supabase
+        const { error: itemsError } = await window.supabaseClient
             .from('order_items')
             .insert(orderItems);
 
