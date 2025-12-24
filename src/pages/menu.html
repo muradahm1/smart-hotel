@@ -25,7 +25,7 @@
                 <a href="reviews.html" class="nav-link" data-translate="nav_reviews">Reviews</a>
             </div>
             <div class="nav-language">
-                <select id="languageSelect">
+                <select id="languageSelect" onchange="setStoredLanguage(this.value)">
                     <option value="en">English</option>
                     <option value="am">አማርኛ</option>
                     <option value="om">Oromoo</option>
@@ -174,6 +174,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script defer src="../assets/js/config-public.js"></script>
     <script defer src="../assets/js/supabase.js"></script>
+    <script defer src="../assets/js/translation.js"></script>
     <script defer src="../assets/js/menu.js"></script>
 </body>
 </html>
