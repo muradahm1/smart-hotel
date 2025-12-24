@@ -33,7 +33,7 @@
                 <a href="reviews.html" class="nav-link" data-translate="nav_reviews">Reviews</a>
             </div>
             <div class="nav-cart">
-                <a href="order.html" class="cart-btn" data-translate="nav_order">
+                <a href="#" class="cart-btn" onclick="goToCart()" data-translate="nav_order">
                     <span>🛒</span>
                     <span class="cart-count">0</span>
                 </a>
@@ -137,6 +137,22 @@
     </style>
     
     <script>
+        function goToCart() {
+            // Get current page directory
+            const currentPath = window.location.pathname;
+            const currentDir = currentPath.substring(0, currentPath.lastIndexOf('/'));
+            
+            // Navigate to order.html in same directory
+            if (window.location.protocol === 'file:') {
+                // For file:// protocol
+                const newPath = currentPath.replace('table.html', 'order.html');
+                window.location.href = newPath;
+            } else {
+                // For http/https protocol
+                window.location.href = './order.html';
+            }
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
             // Get table/room info from URL
             const urlParams = new URLSearchParams(window.location.search);
