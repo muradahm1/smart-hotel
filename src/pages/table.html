@@ -146,42 +146,41 @@
             
             let locationInfo;
             if (roomNumber) {
-                const type = translate('location_type_room');
                 locationInfo = {
                     type: 'room',
                     number: roomNumber,
                     floor: floor,
-                    location: `${translate('location_type_floor')} ${floor}, ${type} ${roomNumber}`
+                    location: `Floor ${floor}, Room ${roomNumber}`
                 };
-                document.getElementById('loadingTitle').textContent = translate('location_welcome').replace('{locationType}', type).replace('{locationId}', roomNumber);
-                document.getElementById('loadingText').textContent = translate('table_preparing_menu').replace('{floor}', floor).replace('{type}', 'room service');
+                document.getElementById('loadingTitle').textContent = `Welcome to Room ${roomNumber}`;
+                document.getElementById('loadingText').textContent = `Preparing your room service menu...`;
             } else if (tableNumber) {
-                const type = translate('location_type_table');
                 locationInfo = {
                     type: 'table',
                     number: tableNumber,
                     floor: floor,
-                    location: `${translate('location_type_floor') || 'Floor'} ${floor}, ${type} ${tableNumber}`
+                    location: `Floor ${floor}, Table ${tableNumber}`
                 };
-                document.getElementById('loadingTitle').textContent = translate('location_welcome').replace('{locationType}', type).replace('{locationId}', tableNumber);
-                document.getElementById('loadingText').textContent = translate('table_preparing_menu').replace('{floor}', floor).replace('{type}', 'dining');
+                document.getElementById('loadingTitle').textContent = `Welcome to Table ${tableNumber}`;
+                document.getElementById('loadingText').textContent = `Preparing your dining menu...`;
             }
             
-            if (locationInfo) {
-                localStorage.setItem('currentLocation', JSON.stringify(locationInfo));
-                localStorage.setItem('ramzFromQR', 'true');
-                localStorage.setItem('ramzTableId', locationInfo.number);
-                
-                // Hide loading screen after 1 second for better UX
-                setTimeout(() => {
-                    document.getElementById('loadingScreen').style.display = 'none';
-                    document.getElementById('navLocation').textContent = locationInfo.location;
-                    document.getElementById('menuLocation').textContent = translate('table_order_prompt').replace('{location}', locationInfo.location).replace('{type}', locationInfo.type);
-                }, 1000);
-            } else {
-                // No location info, hide loading immediately
+            // Always hide loading screen after 2 seconds
+            setTimeout(() => {
                 document.getElementById('loadingScreen').style.display = 'none';
-            }
+                
+                if (locationInfo) {
+                    localStorage.setItem('currentLocation', JSON.stringify(locationInfo));
+                    localStorage.setItem('ramzFromQR', 'true');
+                    localStorage.setItem('ramzTableId', locationInfo.number);
+                    
+                    document.getElementById('navLocation').textContent = locationInfo.location;
+                    document.getElementById('menuLocation').textContent = `You are at ${locationInfo.location}. Browse our menu and place your order!`;
+                } else {
+                    document.getElementById('navLocation').textContent = 'Welcome';
+                    document.getElementById('menuLocation').textContent = 'Browse our menu and place your order!';
+                }
+            }, 2000);
         });
     </script>
 </body>
