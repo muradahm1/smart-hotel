@@ -100,13 +100,13 @@ function showSection(sectionName) {
 }
 
 async function loadOrders() {
-    if (!supabase) {
+    if (!window.supabaseClient) {
         document.getElementById('ordersGrid').innerHTML = '<div class="empty-state">Database connection failed</div>';
         return;
     }
     
     try {
-        const { data, error } = await supabase
+        const { data, error } = await window.supabaseClient
             .from('orders')
             .select('*')
             .order('created_at', { ascending: false });
@@ -203,7 +203,7 @@ function updateOrderStats(orders) {
 
 async function updateOrderStatus(orderId, newStatus) {
     try {
-        const { error } = await supabase
+        const { error } = await window.supabaseClient
             .from('orders')
             .update({ 
                 status: newStatus,
@@ -233,7 +233,7 @@ async function deleteOrder(orderId) {
     
     try {
         // Delete order items first
-        const { error: itemsError } = await supabase
+        const { error: itemsError } = await window.supabaseClient
             .from('order_items')
             .delete()
             .eq('order_id', orderId);
@@ -241,7 +241,7 @@ async function deleteOrder(orderId) {
         if (itemsError) throw itemsError;
         
         // Delete the order
-        const { error: orderError } = await supabase
+        const { error: orderError } = await window.supabaseClient
             .from('orders')
             .delete()
             .eq('id', orderId);
@@ -257,14 +257,14 @@ async function deleteOrder(orderId) {
 }
 
 function listenForNewOrders() {
-    if (!supabase) {
+    if (!window.supabaseClient) {
         console.error('Supabase not available for real-time updates');
         return;
     }
 
     console.log('Setting up real-time subscription for admin...');
     
-    const channel = supabase
+    const channel = window.supabaseClient
         .channel('admin-orders-realtime')
         .on('postgres_changes', {
             event: '*',
@@ -294,13 +294,13 @@ function listenForNewOrders() {
 // --- Menu Management Functions ---
 
 async function loadMenuItems() {
-    if (!supabase) {
+    if (!window.supabaseClient) {
         document.getElementById('menuManagementGrid').innerHTML = '<div class="empty-state">Database connection failed</div>';
         return;
     }
     
     try {
-        const { data, error } = await supabase
+        const { data, error } = await window.supabaseClient
             .from('menu_items')
             .select('*')
             .order('created_at', { ascending: false });
@@ -407,13 +407,13 @@ async function saveMenuItem(event) {
         let result;
         if (itemId) {
             // Update existing item
-            result = await supabase
+            result = await window.supabaseClient
                 .from('menu_items')
                 .update(itemData)
                 .eq('id', itemId);
         } else {
             // Create new item
-            result = await supabase
+            result = await window.supabaseClient
                 .from('menu_items')
                 .insert([itemData]);
         }
@@ -431,7 +431,7 @@ async function saveMenuItem(event) {
 
 async function editMenuItem(itemId) {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await window.supabaseClient
             .from('menu_items')
             .select('*')
             .eq('id', itemId)
@@ -572,7 +572,7 @@ async function deleteMenuItem(itemId) {
     }
     
     try {
-        const { error } = await supabase
+        const { error } = await window.supabaseClient
             .from('menu_items')
             .delete()
             .eq('id', itemId);

@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 async function loadOrders() {
-    if (!supabase) {
+    if (!window.supabaseClient) {
         document.getElementById('ordersGrid').innerHTML = '<div class="empty-state">Database connection failed</div>';
         return;
     }
@@ -20,7 +20,7 @@ async function loadOrders() {
         yesterday.setDate(yesterday.getDate() - 1);
         yesterday.setHours(0, 0, 0, 0);
         
-        const { data, error } = await supabase
+        const { data, error } = await window.supabaseClient
             .from('orders')
             .select(`
                 id, table_number, customer_name, status, created_at, updated_at, location_info, order_source,
@@ -165,7 +165,7 @@ function renderOrders() {
 
 async function markAsServed(orderId) {
     try {
-        const { error } = await supabase
+        const { error } = await window.supabaseClient
             .from('orders')
             .update({ 
                 status: 'completed',
@@ -186,7 +186,7 @@ async function markAsServed(orderId) {
 // Make updateOrderStatus globally available
 window.updateOrderStatus = async function(orderId, newStatus) {
     try {
-        const { error } = await supabase
+        const { error } = await window.supabaseClient
             .from('orders')
             .update({ 
                 status: newStatus,
@@ -215,9 +215,9 @@ function updateStats() {
 }
 
 function listenForOrderUpdates() {
-    if (!supabase) return;
+    if (!window.supabaseClient) return;
 
-    const channel = supabase.channel('hostess-orders')
+    const channel = window.supabaseClient.channel('hostess-orders')
         .on('postgres_changes', { 
             event: '*', 
             schema: 'public', 

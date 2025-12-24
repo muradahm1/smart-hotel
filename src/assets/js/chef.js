@@ -54,7 +54,7 @@ function initAudio() {
 }
 
 async function loadChefOrders() {
-    if (!supabase) {
+    if (!window.supabaseClient) {
         console.log('Database configuration missing');
         showConnectionError();
         return;
@@ -66,7 +66,7 @@ async function loadChefOrders() {
         today.setHours(0, 0, 0, 0);
         
         // Load orders with their items (no pricing data)
-        const { data: ordersData, error: ordersError } = await supabase
+        const { data: ordersData, error: ordersError } = await window.supabaseClient
             .from('orders')
             .select('id, table_number, customer_name, status, created_at, updated_at, location_info, order_source')
             .in('status', ['pending', 'preparing', 'ready'])
@@ -78,7 +78,7 @@ async function loadChefOrders() {
         // Load order items for each order
         const ordersWithItems = await Promise.all(
             (ordersData || []).map(async (order) => {
-                const { data: itemsData, error: itemsError } = await supabase
+                const { data: itemsData, error: itemsError } = await window.supabaseClient
                     .from('order_items')
                     .select(`
                         quantity,
@@ -193,7 +193,7 @@ function updateChefStats(orders) {
 
 async function loadCompletedCount() {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await window.supabaseClient
             .from('orders')
             .select('*')
             .eq('status', 'completed');
@@ -207,7 +207,7 @@ async function loadCompletedCount() {
 
 async function updateOrderStatus(orderId, newStatus) {
     try {
-        const { error } = await supabase
+        const { error } = await window.supabaseClient
             .from('orders')
             .update({ 
                 status: newStatus,
@@ -228,14 +228,14 @@ async function updateOrderStatus(orderId, newStatus) {
 }
 
 function listenForOrderUpdates() {
-    if (!supabase) {
+    if (!window.supabaseClient) {
         console.error('Supabase not available for real-time updates');
         return;
     }
 
     console.log('Setting up real-time subscription for chef...');
     
-    const channel = supabase
+    const channel = window.supabaseClient
         .channel('chef-orders-realtime')
         .on('postgres_changes', {
             event: '*',
