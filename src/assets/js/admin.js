@@ -233,7 +233,7 @@ async function deleteOrder(orderId) {
     
     try {
         // Delete order items first
-        const { error: itemsError } = await window.supabaseClient
+        const { error: itemsError } = await window.supabaseClientClient
             .from('order_items')
             .delete()
             .eq('order_id', orderId);

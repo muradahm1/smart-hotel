@@ -15,7 +15,7 @@ function setupDateFilter() {
 }
 
 async function loadReportsData() {
-    if (!supabase) {
+    if (!window.supabaseClient) {
         console.error('Supabase not initialized');
         return;
     }
@@ -24,7 +24,7 @@ async function loadReportsData() {
         const dateRange = document.getElementById('dateRange').value;
         const dateFilter = getDateFilter(dateRange);
         
-        const { data: orders, error } = await supabase
+        const { data: orders, error } = await window.supabaseClient
             .from('orders')
             .select('*')
             .gte('created_at', dateFilter)
