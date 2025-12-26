@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Table Menu | RAMZ</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
@@ -119,7 +123,7 @@
             height: 100%;
             background: linear-gradient(90deg, #c9b48c, #d4c299);
             border-radius: 2px;
-            animation: progress 3s ease-in-out forwards;
+            animation: progress 0.5s ease-in-out forwards;
         }
         @keyframes progress {
             0% { width: 0%; }
@@ -182,7 +186,7 @@
                 document.getElementById('loadingText').textContent = `Preparing your dining menu...`;
             }
             
-            // Always hide loading screen after 2 seconds
+            // Always hide loading screen after 0.5 seconds
             setTimeout(() => {
                 document.getElementById('loadingScreen').style.display = 'none';
                 
@@ -197,7 +201,7 @@
                     document.getElementById('navLocation').textContent = 'Welcome';
                     document.getElementById('menuLocation').textContent = 'Browse our menu and place your order!';
                 }
-            }, 2000);
+            }, 500);
         });
     </script>
 </body>
