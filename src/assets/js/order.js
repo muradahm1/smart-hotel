@@ -58,8 +58,29 @@ function loadOrderItems() {
     // Auto-fill table number only if came from QR/NFC scan
     const storedTable = localStorage.getItem('ramzTableId');
     const fromQR = localStorage.getItem('ramzFromQR');
+    const locationData = localStorage.getItem('currentLocation');
     const tableInput = document.getElementById('tableNumber');
     
+    // Handle Room vs Table UI based on saved location
+    if (locationData) {
+        try {
+            const location = JSON.parse(locationData);
+            if (location.type === 'room') {
+                const label = document.querySelector('label[for="tableNumber"]');
+                if (label) {
+                    label.textContent = 'Room Number:';
+                    label.removeAttribute('data-translate');
+                }
+                if (tableInput) {
+                    tableInput.placeholder = 'Enter room number';
+                    tableInput.removeAttribute('data-translate-placeholder');
+                }
+            }
+        } catch (e) {
+            console.error('Error parsing location data:', e);
+        }
+    }
+
     if (storedTable && fromQR === 'true' && tableInput) {
         tableInput.value = storedTable;
         tableInput.readOnly = true;
@@ -160,7 +181,7 @@ const ORDER_COOLDOWN = 30000; // 30 seconds
 // Enhanced input validation functions
 function validateTableNumber(tableNumber) {
     const num = parseInt(tableNumber);
-    return Number.isInteger(num) && num >= 1 && num <= 100; // Reasonable table limit
+    return Number.isInteger(num) && num >= 1 && num <= 10000; // Increased limit for rooms
 }
 
 function validateCustomerName(name) {
