@@ -152,10 +152,10 @@ function renderChefOrders(orders) {
                     `).join('') : 
                     '<div class="order-item"><span class="item-name">No items found</span></div>'
                 }
-                ${order.special_notes || order.notes ? `
+                ${order.notes ? `
                     <div class="order-special-requirements">
                         <i class="fas fa-clipboard-list"></i>
-                        <strong>Order Notes:</strong> ${order.special_notes || order.notes}
+                        <strong>Order Notes:</strong> ${order.notes}
                     </div>
                 ` : ''}
             </div>

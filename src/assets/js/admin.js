@@ -150,6 +150,13 @@ function renderOrders(orders) {
                 }
             </div>
             
+            ${order.notes ? `
+                <div class="order-notes" style="margin: 10px 0; padding: 8px; background: rgba(201, 180, 140, 0.1); border-left: 3px solid var(--accent-gold); font-size: 0.9em;">
+                    <i class="fas fa-comment-alt" style="color: var(--accent-gold); margin-right: 5px;"></i>
+                    <strong>Note:</strong> ${order.notes}
+                </div>
+            ` : ''}
+            
             <div class="order-summary-row">
                 <strong>Total: ${formatCurrency(order.total_amount)}</strong>
             </div>
