@@ -522,10 +522,6 @@ async function submitConfirmedOrder() {
         localStorage.removeItem('restaurant_cart');
         showOrderSuccess(order.id, orderData.tableNumber);
         
-        setTimeout(() => {
-            window.location.href = 'index.html';
-        }, 3000);
-
     } catch (error) {
         console.error('Error placing order:', error);
         console.error('Error details:', {
@@ -585,16 +581,59 @@ function clearTableNumber() {
 
 function showOrderSuccess(orderId, tableNumber) {
     const successModal = document.createElement('div');
+    successModal.id = 'successModal';
+    successModal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(5px);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    `;
+    
     successModal.innerHTML = `
-        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center;">
-            <div style="background: var(--background-light); padding: 2rem; border-radius: var(--border-radius); text-align: center; border: 2px solid var(--accent-gold);">
-                <i class="fas fa-check-circle" style="font-size: 3rem; color: var(--accent-gold); margin-bottom: 1rem;"></i>
-                <h2 style="color: var(--accent-gold); margin-bottom: 1rem;">${translate('order_success_header')}</h2>
-                <p style="margin-bottom: 0.5rem;">${translate('order_success_id')} <strong>${orderId.substring(0, 8)}</strong></p>
-                <p style="margin-bottom: 1rem;">${translate('order_success_table')} <strong>${tableNumber}</strong></p>
-                <p style="color: var(--text-secondary);">${translate('order_success_redirect')}</p>
+        <div style="
+            background: #1a1a1a;
+            padding: 2.5rem;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid #c9b48c;
+            box-shadow: 0 0 20px rgba(201, 180, 140, 0.2);
+            max-width: 400px;
+            width: 90%;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        ">
+            <div style="width: 80px; height: 80px; background: rgba(201, 180, 140, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                <i class="fas fa-check" style="font-size: 2.5rem; color: #c9b48c;"></i>
             </div>
+            <h2 style="color: #c9b48c; margin-bottom: 0.5rem; font-family: 'Playfair Display', serif; font-size: 1.8rem;">${translate('order_success_header')}</h2>
+            <p style="color: #ccc; margin-bottom: 1.5rem;">Your order has been received and is being prepared.</p>
+            <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; text-align: left;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: #fff;">
+                    <span style="color: #888;">${translate('order_success_id')}</span>
+                    <span style="font-family: monospace; letter-spacing: 1px;">#${orderId.substring(0, 8).toUpperCase()}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; color: #fff;">
+                    <span style="color: #888;">${translate('order_success_table')}</span>
+                    <span>${tableNumber}</span>
+                </div>
+            </div>
+            <button onclick="document.getElementById('successModal').style.opacity = '0'; setTimeout(() => { document.getElementById('successModal').remove(); window.location.reload(); }, 300);" class="btn btn-primary" style="width: 100%; margin-top: 0;">Close</button>
         </div>
     `;
     document.body.appendChild(successModal);
+    
+    // Trigger animation
+    requestAnimationFrame(() => {
+        successModal.style.opacity = '1';
+        successModal.querySelector('div').style.transform = 'translateY(0)';
+    });
 }
