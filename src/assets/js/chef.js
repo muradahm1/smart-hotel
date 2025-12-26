@@ -68,7 +68,7 @@ async function loadChefOrders() {
         // Load orders with their items (no pricing data)
         const { data: ordersData, error: ordersError } = await window.supabaseClient
             .from('orders')
-            .select('id, table_number, customer_name, status, created_at, updated_at, location_info, order_source')
+            .select('id, table_number, customer_name, status, created_at, updated_at, location_info, order_source, notes')
             .in('status', ['pending', 'preparing', 'ready'])
             .gte('created_at', today.toISOString())
             .order('created_at', { ascending: true });

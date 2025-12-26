@@ -23,7 +23,7 @@ async function loadOrders() {
         const { data, error } = await window.supabaseClient
             .from('orders')
             .select(`
-                id, table_number, customer_name, status, created_at, updated_at, location_info, order_source,
+                id, table_number, customer_name, status, created_at, updated_at, location_info, order_source, notes,
                 order_items (
                     quantity,
                     price,
@@ -132,6 +132,28 @@ function renderOrders() {
             itemsList.appendChild(noItemsRow);
         }
         
+        // Display special notes if available
+        if (order.notes) {
+            const notesRow = document.createElement('div');
+            notesRow.className = 'order-item-row order-notes';
+            notesRow.style.marginTop = '10px';
+            notesRow.style.paddingTop = '10px';
+            notesRow.style.borderTop = '1px dashed #eee';
+            notesRow.style.color = 'var(--accent-gold)';
+            
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-comment-alt';
+            icon.style.marginRight = '8px';
+            
+            const noteText = document.createElement('span');
+            noteText.textContent = order.notes;
+            noteText.style.fontStyle = 'italic';
+            
+            notesRow.appendChild(icon);
+            notesRow.appendChild(noteText);
+            itemsList.appendChild(notesRow);
+        }
+
         // Actions
         const actions = document.createElement('div');
         actions.className = 'order-card-actions';
