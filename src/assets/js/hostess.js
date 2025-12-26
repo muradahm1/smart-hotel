@@ -139,7 +139,8 @@ function renderOrders() {
             notesRow.style.marginTop = '10px';
             notesRow.style.paddingTop = '10px';
             notesRow.style.borderTop = '1px dashed #eee';
-            notesRow.style.color = 'var(--accent-gold)';
+            notesRow.style.color = '#d4a017';
+            notesRow.style.fontWeight = '600';
             
             const icon = document.createElement('i');
             icon.className = 'fas fa-comment-alt';

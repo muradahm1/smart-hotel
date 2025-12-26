@@ -153,9 +153,9 @@ function renderChefOrders(orders) {
                     '<div class="order-item"><span class="item-name">No items found</span></div>'
                 }
                 ${order.notes ? `
-                    <div class="order-special-requirements">
-                        <i class="fas fa-clipboard-list"></i>
-                        <strong>Order Notes:</strong> ${order.notes}
+                    <div class="order-special-requirements" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.2); color: #ff9f43;">
+                        <i class="fas fa-comment-dots" style="margin-right: 5px;"></i>
+                        <strong>Note:</strong> ${order.notes}
                     </div>
                 ` : ''}
             </div>
