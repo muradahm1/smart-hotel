@@ -118,17 +118,17 @@ async function login(email, password) {
             // Use relative paths for security
             switch(user.role) {
                 case 'admin':
-                    window.location.href = './admin.html';
+                    window.location.href = '/admin';
                     break;
                 case 'chef':
-                    window.location.href = './chef.html';
+                    window.location.href = '/chef';
                     break;
                 case 'hostess':
-                    window.location.href = './hostess.html';
+                    window.location.href = '/hostess';
                     break;
             }
         } else {
-            window.location.href = './index.html';
+            window.location.href = '/';
         }
         
         return user;

@@ -15,6 +15,14 @@
     {
       "source": "/hostess",
       "destination": "/src/pages/hostess.html"
+    },
+    {
+      "source": "/order",
+      "destination": "/src/pages/order.html"
+    },
+    {
+      "source": "/reviews",
+      "destination": "/src/pages/reviews.html"
     }
   ],
   "cleanUrls": true
