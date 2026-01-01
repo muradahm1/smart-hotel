@@ -1,0 +1,21 @@
+{
+  "rewrites": [
+    {
+      "source": "/menu",
+      "destination": "/src/pages/menu.html"
+    },
+    {
+      "source": "/chef",
+      "destination": "/src/pages/chef.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/src/pages/admin.html"
+    },
+    {
+      "source": "/hostess",
+      "destination": "/src/pages/hostess.html"
+    }
+  ],
+  "cleanUrls": true
+}

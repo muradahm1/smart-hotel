@@ -30,19 +30,22 @@ The project includes a demo configuration that works without setup.
 ## Project Structure
 
 ```
-hotel/
-├── assets/
-│   ├── css/style.css
-│   ├── js/
-│   │   ├── config.example.js
-│   │   ├── admin.js
-│   │   ├── main.js
-│   │   └── ...
-│   └── images/
+smart-hotel-main/
+├── src/
+│   ├── assets/
+│   │   ├── css/style.css
+│   │   ├── js/
+│   │   │   ├── config.js (create from .env)
+│   │   │   ├── main.js
+│   │   │   └── ...
+│   │   └── images/
+│   └── pages/
+│       ├── menu.html
+│       ├── admin.html
+│       └── ...
 ├── index.html
-├── menu.html
-├── admin.html
-└── hostess.html
+├── .env (local only)
+└── DEPLOY.md
 ```
 
 ## Contributing

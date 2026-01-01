@@ -72,8 +72,13 @@ async function login(email, password) {
         }
         
         // Password strength check
-        if (password.length < 6) {
-            throw new Error('Password must be at least 6 characters long');
+        if (password.length < 8) {
+            throw new Error('Password must be at least 8 characters long');
+        }
+        
+        // Check password complexity
+        if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+            throw new Error('Password must contain uppercase, lowercase, and number');
         }
         
         await waitForSupabase();
