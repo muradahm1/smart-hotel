@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Menu | RAMZ</title>
-    <link rel="stylesheet" href="/src/assets/css/style.css">
-    <link rel="stylesheet" href="/src/assets/css/mobile-fixes.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/mobile-fixes.css">
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,9 +25,9 @@
                 <h2>RAMZ</h2>
             </div>
             <div class="nav-menu">
-                <a href="/" class="nav-link" data-translate="nav_home">Home</a>
-                <a href="/menu" class="nav-link active" data-translate="nav_menu">Menu</a>
-                <a href="/reviews" class="nav-link" data-translate="nav_reviews">Reviews</a>
+                <a href="../../index.html" class="nav-link" data-translate="nav_home">Home</a>
+                <a href="menu.html" class="nav-link active" data-translate="nav_menu">Menu</a>
+                <a href="reviews.html" class="nav-link" data-translate="nav_reviews">Reviews</a>
             </div>
             <div class="nav-language">
                 <select id="languageSelect" onchange="setStoredLanguage(this.value)">
@@ -37,7 +37,7 @@
                 </select>
             </div>
             <div class="nav-cart">
-                <a href="/order" class="cart-btn">
+                <a href="order.html" class="cart-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shopping-bag">
                         <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
                         <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -149,7 +149,7 @@
     </button>
     
     <!-- Home Button -->
-    <a href="/" class="home-btn">
+    <a href="../../index.html" class="home-btn">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home">
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
             <polyline points="9 22 9 12 15 12 15 22"></polyline>
@@ -183,9 +183,9 @@
     </footer>
 
     <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script defer src="/src/assets/js/config.js"></script>
-    <script defer src="/src/assets/js/supabase.js"></script>
-    <script defer src="/src/assets/js/translation.js"></script>
-    <script defer src="/src/assets/js/menu.js"></script>
+    <script defer src="../assets/js/config.js"></script>
+    <script defer src="../assets/js/supabase.js"></script>
+    <script defer src="../assets/js/translation.js"></script>
+    <script defer src="../assets/js/menu.js"></script>
 </body>
 </html>
