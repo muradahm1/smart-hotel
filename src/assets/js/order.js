@@ -103,7 +103,7 @@ function loadOrderItems() {
             <div class="empty-order">
                 <h3 data-translate="order_cart_empty">${translate('order_cart_empty')}</h3>
                 <p data-translate="order_cart_empty_prompt">${translate('order_cart_empty_prompt')}</p>
-                <a href="menu.html" class="btn btn-primary" data-translate="order_browse_menu">${translate('order_browse_menu')}</a>
+                <a href="/menu" class="btn btn-primary" data-translate="order_browse_menu">${translate('order_browse_menu')}</a>
             </div>
         `;
         orderSummaryContainer.innerHTML = '';
@@ -626,7 +626,7 @@ function showOrderSuccess(orderId, tableNumber) {
                     <span>${tableNumber}</span>
                 </div>
             </div>
-            <button onclick="document.getElementById('successModal').style.opacity = '0'; setTimeout(() => { document.getElementById('successModal').remove(); window.location.reload(); }, 300);" class="btn btn-primary" style="width: 100%; margin-top: 0;">Close</button>
+            <button onclick="document.getElementById('successModal').style.opacity = '0'; setTimeout(() => { document.getElementById('successModal').remove(); window.location.href = '/menu'; }, 300);" class="btn btn-primary" style="width: 100%; margin-top: 0;">Close</button>
         </div>
     `;
     document.body.appendChild(successModal);
