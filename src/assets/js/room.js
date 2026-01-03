@@ -24,7 +24,7 @@ if (typeof window.roomInitialized === 'undefined') {
             localStorage.setItem('currentLocation', JSON.stringify(locationInfo));
             
             // Redirect immediately to menu page
-            window.location.href = './menu.html';
+            window.location.href = '/menu';
             
         } else {
             // Clear any existing location data when QR scan fails
