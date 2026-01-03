@@ -17,8 +17,8 @@
     <div id="loadingScreen" class="loading-overlay">
         <div class="loading-content">
             <div class="loading-spinner"></div>
-            <h1 id="loadingTitle" data-translate="room_loading_title">Welcome to Room Service</h1>
-            <p id="loadingText" data-translate="room_loading_text">Preparing your room service menu...</p>
+            <h1 id="loadingTitle">Welcome to Room Service</h1>
+            <p id="loadingText">Preparing your room service menu...</p>
             <div class="loading-progress">
                 <div class="progress-bar"></div>
             </div>
@@ -30,20 +30,16 @@
         <div class="nav-container">
             <div class="nav-logo">
                 <h2>RAMZ</h2>
-                <p id="navLocation" style="font-size: 0.8em; margin: 0;" data-translate="room_nav_location">Loading...</p>
+                <p id="navLocation" style="font-size: 0.8em; margin: 0;">Loading...</p>
             </div>
             <div class="nav-menu">
-                <a href="../../index.html" class="nav-link" data-translate="nav_home">Home</a>
-                <a href="reviews.html" class="nav-link" data-translate="nav_reviews">Reviews</a>
+                <a href="../../index.html" class="nav-link">Home</a>
+                <a href="reviews.html" class="nav-link">Reviews</a>
             </div>
 
             <div class="nav-cart">
                 <a href="order.html" class="cart-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shopping-bag">
-                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                        <line x1="3" y1="6" x2="21" y2="6"></line>
-                        <path d="M16 10a4 4 0 0 1-8 0"></path>
-                    </svg>
+                    <span>🛒</span>
                     <span class="cart-count">0</span>
                 </a>
             </div>
@@ -59,8 +55,8 @@
     <section class="menu-section">
         <div class="container">
             <div class="menu-header">
-                <h2 class="section-title" data-translate="room_menu_title">Room Service Menu</h2>
-                <p id="menuLocation" data-translate="room_menu_location">Loading location...</p>
+                <h2 class="section-title">Room Service Menu</h2>
+                <p id="menuLocation">Loading location...</p>
             </div>
 
             <!-- Category Filters -->
@@ -82,11 +78,11 @@
     </section>
 
     <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-     <script defer src="../assets/js/config-public.js"></script>
+    <script defer src="../assets/js/config-public.js"></script>
     <script defer src="../assets/js/supabase.js"></script>
     <script defer src="../assets/js/translation.js"></script>
-    <script defer src="../assets/js/menu.js"></script>
     <script defer src="../assets/js/room.js"></script>
+    <script defer src="../assets/js/menu.js"></script>
     
     <style>
         .loading-overlay {
@@ -133,7 +129,7 @@
             height: 100%;
             background: linear-gradient(90deg, #c9b48c, #d4c299);
             border-radius: 2px;
-            animation: progress 1s ease-in-out forwards;
+            animation: progress 0.5s ease-in-out forwards;
         }
         @keyframes progress {
             0% { width: 0%; }

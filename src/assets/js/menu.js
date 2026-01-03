@@ -95,7 +95,48 @@ if (typeof window.menuInitialized === 'undefined') {
         initScrollToTop();
         initMobileNavigation();
         initScrollAnimations();
+        displayLocationInfo();
     });
+}
+
+// Display location information if coming from QR scan
+function displayLocationInfo() {
+    const locationInfo = JSON.parse(localStorage.getItem('currentLocation') || '{}');
+    const fromQR = localStorage.getItem('ramzFromQR') === 'true';
+    
+    if (fromQR && locationInfo.location) {
+        // Update navigation location display
+        const navLogo = document.querySelector('.nav-logo');
+        if (navLogo) {
+            const locationDisplay = navLogo.querySelector('.location-display') || document.createElement('p');
+            locationDisplay.className = 'location-display';
+            locationDisplay.style.cssText = 'font-size: 0.8em; margin: 0; color: var(--accent-gold);';
+            locationDisplay.textContent = locationInfo.location;
+            if (!navLogo.querySelector('.location-display')) {
+                navLogo.appendChild(locationDisplay);
+            }
+        }
+        
+        // Update menu header with location info
+        const menuHeader = document.querySelector('.menu-header');
+        if (menuHeader) {
+            const locationMessage = menuHeader.querySelector('.location-message') || document.createElement('div');
+            locationMessage.className = 'location-message';
+            locationMessage.style.cssText = 'background: var(--background-light); padding: 1rem; border-radius: var(--border-radius); margin-bottom: 2rem; border-left: 4px solid var(--accent-gold);';
+            locationMessage.innerHTML = `
+                <p style="margin: 0; color: var(--accent-gold); font-weight: 600;">
+                    <i class="fas fa-map-marker-alt"></i> 
+                    You are at ${locationInfo.location}
+                </p>
+                <p style="margin: 0.5rem 0 0 0; color: var(--text-secondary); font-size: 0.9rem;">
+                    Browse our menu and place your order directly to your ${locationInfo.type}!
+                </p>
+            `;
+            if (!menuHeader.querySelector('.location-message')) {
+                menuHeader.appendChild(locationMessage);
+            }
+        }
+    }
 }
 
 async function initializeMenu() {

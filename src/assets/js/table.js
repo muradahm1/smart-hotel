@@ -3,55 +3,49 @@ if (typeof window.tableInitialized === 'undefined') {
     window.tableInitialized = true;
     
     document.addEventListener('DOMContentLoaded', function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const tableId = urlParams.get('table_id') || urlParams.get('table');
-    const roomId = urlParams.get('room_id') || urlParams.get('room');
+        const urlParams = new URLSearchParams(window.location.search);
+        const tableId = urlParams.get('table_id') || urlParams.get('table') || urlParams.get('t');
+        const roomId = urlParams.get('room_id') || urlParams.get('room') || urlParams.get('r');
+        const floor = urlParams.get('floor') || urlParams.get('f') || '1';
 
-    let locationId = tableId || roomId;
-    let locationType = tableId ? 'table' : (roomId ? 'room' : null);
+        let locationId = tableId || roomId;
+        let locationType = tableId ? 'table' : (roomId ? 'room' : null);
 
-    if (locationId && locationType) {
-        localStorage.setItem('ramzLocationId', locationId);
-        localStorage.setItem('ramzLocationType', locationType);
-        localStorage.setItem('ramzFromQR', 'true');
-        
-        const translatedLocationType = translate(`location_type_${locationType}`);
-
-        // Show location info before redirecting
-        document.body.innerHTML = `
-            <div class="container" style="text-align: center; padding-top: 5rem;">
-                <h1 style="color: var(--accent-gold); font-size: 3rem; margin-bottom: 1rem;" data-translate="location_welcome">${translate('location_welcome').replace('{locationType}', translatedLocationType).replace('{locationId}', locationId)}</h1>
-                <p style="font-size: 1.2rem; margin-bottom: 2rem;" data-translate="location_seated">${translate('location_seated').replace('{locationType}', translatedLocationType).replace('{locationId}', locationId)}</p>
-                <p data-translate="location_redirect">${translate('location_redirect').replace('{seconds}', '<span id="countdown">3</span>')}</p>
-            </div>
-        `;
-        
-        let countdown = 3;
-        const countdownElement = document.getElementById('countdown');
-        
-        if (countdownElement) {
-            const timer = setInterval(() => {
-                countdown--;
-                countdownElement.textContent = countdown;
-                
-                if (countdown <= 0) {
-                    clearInterval(timer);
-                    window.location.href = './menu.html';
-                }
-            }, 1000);
+        if (locationId && locationType) {
+            // Store location data immediately
+            localStorage.setItem('ramzLocationId', locationId);
+            localStorage.setItem('ramzLocationType', locationType);
+            localStorage.setItem('ramzFromQR', 'true');
+            localStorage.setItem('ramzTableId', locationId);
+            
+            // Create location info object
+            const locationInfo = {
+                type: locationType,
+                number: locationId,
+                floor: floor,
+                location: `Floor ${floor}, ${locationType.charAt(0).toUpperCase() + locationType.slice(1)} ${locationId}`
+            };
+            localStorage.setItem('currentLocation', JSON.stringify(locationInfo));
+            
+            // Redirect immediately to menu page
+            window.location.href = './menu.html';
+            
+        } else {
+            // Clear any existing location data when QR scan fails
+            localStorage.removeItem('ramzLocationId');
+            localStorage.removeItem('ramzLocationType');
+            localStorage.removeItem('ramzFromQR');
+            localStorage.removeItem('ramzTableId');
+            localStorage.removeItem('currentLocation');
+            
+            // Show error message
+            document.body.innerHTML = `
+                <div class="container" style="text-align: center; padding-top: 5rem;">
+                    <h1 style="color: var(--accent-gold); margin-bottom: 1rem;">Invalid Location</h1>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">The scanned QR code is invalid. Please try again.</p>
+                    <a href="../../index.html" class="btn btn-primary">Go Home</a>
+                </div>
+            `;
         }
-        
-    } else {
-        // Clear any existing location data when QR scan fails
-        localStorage.removeItem('ramzLocationId');
-        localStorage.removeItem('ramzLocationType');
-        localStorage.removeItem('ramzFromQR');
-        document.body.innerHTML = `
-            <div class="container" style="text-align: center; padding-top: 5rem;">
-                <h1 data-translate="location_error_title">${translate('location_error_title')}</h1>
-                <p data-translate="location_error_text">${translate('location_error_text')}</p>
-            </div>
-        `;
-    }
     });
 }

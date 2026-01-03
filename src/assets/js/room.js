@@ -1,36 +1,47 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // Get room info from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const roomNumber = urlParams.get('room') || urlParams.get('r');
-    const floor = urlParams.get('floor') || urlParams.get('f') || '1';
+// Prevent multiple initializations
+if (typeof window.roomInitialized === 'undefined') {
+    window.roomInitialized = true;
     
-    let locationInfo;
-    if (roomNumber) {
-        locationInfo = {
-            type: 'room',
-            number: roomNumber,
-            floor: floor,
-            location: `Floor ${floor}, Room ${roomNumber}`
-        };
-        const loadingTitle = document.getElementById('loadingTitle');
-        const loadingText = document.getElementById('loadingText');
-        
-        if (loadingTitle) loadingTitle.textContent = `Welcome to Room ${roomNumber}`;
-        if (loadingText) loadingText.textContent = `Floor ${floor} - Preparing your room service menu...`;
-    }
-    
-    if (locationInfo) {
-        localStorage.setItem('currentLocation', JSON.stringify(locationInfo));
-        localStorage.setItem('ramzFromQR', 'true');
-        localStorage.setItem('ramzTableId', locationInfo.number);
-        
-        setTimeout(() => {
-            document.getElementById('loadingScreen').style.display = 'none';
-            document.getElementById('navLocation').textContent = locationInfo.location;
-            document.getElementById('menuLocation').textContent = `${locationInfo.location} - Order directly to your room`;
-        }, 300);
-    } else {
-        // No location info, hide loading immediately
-        document.getElementById('loadingScreen').style.display = 'none';
-    }
-});
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomId = urlParams.get('room_id') || urlParams.get('room') || urlParams.get('r');
+        const floor = urlParams.get('floor') || urlParams.get('f') || '1';
+
+        if (roomId) {
+            // Store location data immediately
+            localStorage.setItem('ramzLocationId', roomId);
+            localStorage.setItem('ramzLocationType', 'room');
+            localStorage.setItem('ramzFromQR', 'true');
+            localStorage.setItem('ramzTableId', roomId);
+            
+            // Create location info object
+            const locationInfo = {
+                type: 'room',
+                number: roomId,
+                floor: floor,
+                location: `Floor ${floor}, Room ${roomId}`
+            };
+            localStorage.setItem('currentLocation', JSON.stringify(locationInfo));
+            
+            // Redirect immediately to menu page
+            window.location.href = './menu.html';
+            
+        } else {
+            // Clear any existing location data when QR scan fails
+            localStorage.removeItem('ramzLocationId');
+            localStorage.removeItem('ramzLocationType');
+            localStorage.removeItem('ramzFromQR');
+            localStorage.removeItem('ramzTableId');
+            localStorage.removeItem('currentLocation');
+            
+            // Show error message
+            document.body.innerHTML = `
+                <div class="container" style="text-align: center; padding-top: 5rem;">
+                    <h1 style="color: var(--accent-gold); margin-bottom: 1rem;">Invalid Room</h1>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">The scanned QR code is invalid. Please try again.</p>
+                    <a href="../../index.html" class="btn btn-primary">Go Home</a>
+                </div>
+            `;
+        }
+    });
+}
