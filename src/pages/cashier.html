@@ -1,0 +1,60 @@
+<!DOCTYPE html> 
+<html lang="eng">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Cashier Dashboard | RAMZ</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        />
+        <link rel="stylesheet" href="/src/assets/css/style.css" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap"
+            rel="stylesheet"
+        />
+    </head>
+    <body>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <h2>RAMZ Cashier</h2>
+                </div>
+                <div class="nav-menu">
+                    <a href="/menu" class="nav-link">Menu</a>
+                    <a href="/cashier" class="nav-link active">Cashier Dashboard</a>
+                </div>
+            </div>
+        </nav>
+
+        <section class="admin-section">
+            <div class="notification-area" id="notificationArea"></div>
+
+            <div class="container">
+                <div class="admin-header">
+                    <h1><i class="fas fa-cash-register"></i> Cashier Dashboard</h1>
+                    <div class="cashier-stats">
+                        <div class="stat-card">
+                            <h3 id="totalSales">$0.00</h3>
+                            <p>Total Sales</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="transactionsToday">0</h3>
+                            <p>Transactions Today</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="pendingPayments">0</h3>
+                            <p>Pending Payments</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cashier-transactions-grid" id="cashierTransactionsGrid">
+                    <!-- Transactions will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <script src="/src/assets/js/cashier.js"></script>
+
+</html>
