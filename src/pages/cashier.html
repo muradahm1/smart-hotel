@@ -1,60 +1,70 @@
 <!DOCTYPE html> 
-<html lang="eng">
+<html lang="en">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Cashier Dashboard | RAMZ</title>
-        <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        />
+        <title>Cashier | RAMZ</title>
+        <link rel="manifest" href="/cashier-manifest.json">
+        <meta name="theme-color" content="#c9b48c">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
         <link rel="stylesheet" href="/src/assets/css/style.css" />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap"
-            rel="stylesheet"
-        />
+        <link rel="stylesheet" href="/src/assets/css/cashier.css" />
     </head>
     <body>
-        <nav class="navbar">
-            <div class="nav-container">
-                <div class="nav-logo">
-                    <h2>RAMZ Cashier</h2>
-                </div>
-                <div class="nav-menu">
-                    <a href="/menu" class="nav-link">Menu</a>
-                    <a href="/cashier" class="nav-link active">Cashier Dashboard</a>
-                </div>
-            </div>
-        </nav>
+        <!-- Quick Search -->
+        <div class="quick-search">
+            <input type="text" id="orderSearch" placeholder="Search Order ID or Table..." autofocus>
+            <button id="searchBtn" class="btn btn-primary">Search</button>
+        </div>
 
-        <section class="admin-section">
-            <div class="notification-area" id="notificationArea"></div>
-
-            <div class="container">
-                <div class="admin-header">
-                    <h1><i class="fas fa-cash-register"></i> Cashier Dashboard</h1>
-                    <div class="cashier-stats">
-                        <div class="stat-card">
-                            <h3 id="totalSales">$0.00</h3>
-                            <p>Total Sales</p>
-                        </div>
-                        <div class="stat-card">
-                            <h3 id="transactionsToday">0</h3>
-                            <p>Transactions Today</p>
-                        </div>
-                        <div class="stat-card">
-                            <h3 id="pendingPayments">0</h3>
-                            <p>Pending Payments</p>
-                        </div>
-                    </div>
+        <!-- Simple Payment Modal -->
+        <div id="paymentModal" class="modal">
+            <div class="modal-content simple-payment">
+                <h3>Process Payment</h3>
+                <div id="orderInfo"></div>
+                
+                <div class="payment-methods-simple">
+                    <button class="payment-btn-simple active" data-method="cash">Cash</button>
+                    <button class="payment-btn-simple" data-method="card">Card</button>
+                    <button class="payment-btn-simple" data-method="mobile">Mobile</button>
                 </div>
-
-                <div class="cashier-transactions-grid" id="cashierTransactionsGrid">
-                    <!-- Transactions will be loaded here -->
+                
+                <div class="amount-input">
+                    <label>Total: <span id="totalAmount">$0.00</span></label>
+                    <input type="number" id="receivedInput" placeholder="Amount received" step="0.01">
+                    <div>Change: <span id="changeDisplay">$0.00</span></div>
+                </div>
+                
+                <div class="payment-actions-simple">
+                    <button id="payBtn" class="btn btn-success btn-large">PAY & PRINT (Enter)</button>
+                    <button id="cancelBtn" class="btn btn-secondary">Cancel (Esc)</button>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <script src="/src/assets/js/cashier.js"></script>
+        <!-- Main Content -->
+        <div class="cashier-layout">
+            <!-- Left Side - Orders List -->
+            <div class="orders-panel">
+                <h2>Ready Orders</h2>
+                <div class="orders-list" id="ordersList">
+                    <!-- Orders will load here -->
+                </div>
+            </div>
+            
+            <!-- Right Side - Selected Order Details -->
+            <div class="order-details-panel" id="orderDetailsPanel">
+                <div class="no-selection">
+                    <i class="fas fa-hand-pointer"></i>
+                    <h3>Select an Order</h3>
+                    <p>Click on an order from the left to view details and process payment</p>
+                </div>
+            </div>
+        </div>
 
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <script src="/src/assets/js/config.js"></script>
+        <script src="/src/assets/js/supabase.js"></script>
+        <script src="/src/assets/js/cashier-simple.js"></script>
+    </body>
 </html>

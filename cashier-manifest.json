@@ -1,0 +1,55 @@
+{
+  "name": "RAMZ Cashier System",
+  "short_name": "RAMZ Cashier",
+  "description": "Professional cashier system for RAMZ Hotel restaurant",
+  "start_url": "/src/pages/cashier.html",
+  "display": "standalone",
+  "background_color": "#1a1a1a",
+  "theme_color": "#c9b48c",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/src/assets/images/cashier-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/src/assets/images/cashier-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "en",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Process Payment",
+      "short_name": "Payment",
+      "description": "Quick payment processing",
+      "url": "/src/pages/cashier.html#payment",
+      "icons": [
+        {
+          "src": "/src/assets/images/payment-icon.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Print Receipt",
+      "short_name": "Print",
+      "description": "Print customer receipt",
+      "url": "/src/pages/cashier.html#print",
+      "icons": [
+        {
+          "src": "/src/assets/images/print-icon.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}
