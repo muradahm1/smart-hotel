@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
@@ -15,11 +15,61 @@
         <div class="quick-search">
             <input type="text" id="orderSearch" placeholder="Search Order ID or Table..." autofocus>
             <button id="searchBtn" class="btn btn-primary">Search</button>
+            <button id="refreshOrders" class="btn btn-secondary">
+                <i class="fas fa-sync"></i> Refresh
+            </button>
+            <button id="printLastBtn" class="btn btn-secondary">
+                <i class="fas fa-print"></i> Print Last
+            </button>
+            <button id="manualPrintBtn" class="btn btn-secondary">
+                <i class="fas fa-receipt"></i> Manual Print
+            </button>
         </div>
 
-        <!-- Simple Payment Modal -->
-        <div id="paymentModal" class="modal">
-            <div class="modal-content simple-payment">
+        <!-- Daily Sales Summary -->
+        <div class="sales-summary">
+            <div class="sales-item">
+                <span class="sales-label">Today's Sales:</span>
+                <span id="todaySales" class="sales-value">$0.00</span>
+            </div>
+            <div class="sales-item">
+                <span class="sales-label">Orders:</span>
+                <span id="orderCount" class="sales-value">0</span>
+            </div>
+            <div class="sales-item">
+                <span class="sales-label">Ready:</span>
+                <span id="readyCount" class="sales-value">0</span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="cashier-layout">
+            <!-- Left Side - Orders List -->
+            <div class="orders-panel">
+                <div class="orders-header">
+                    <h2>Ready Orders</h2>
+                    <div class="order-status-indicators">
+                        <div class="status-indicator new">New</div>
+                        <div class="status-indicator waiting">Waiting</div>
+                        <div class="status-indicator urgent">Urgent</div>
+                    </div>
+                </div>
+                <div class="orders-list" id="ordersList">
+                    <!-- Orders will load here -->
+                </div>
+            </div>
+            
+            <!-- Middle - Selected Order Details -->
+            <div class="order-details-panel" id="orderDetailsPanel">
+                <div class="no-selection">
+                    <i class="fas fa-hand-pointer"></i>
+                    <h3>Select an Order</h3>
+                    <p>Click on an order from the left to view details and process payment</p>
+                </div>
+            </div>
+            
+            <!-- Right Side - Payment Panel -->
+            <div class="payment-panel" id="paymentPanel" style="display: none;">
                 <h3>Process Payment</h3>
                 <div id="orderInfo"></div>
                 
@@ -31,6 +81,12 @@
                 
                 <div class="amount-input">
                     <label>Total: <span id="totalAmount">$0.00</span></label>
+                    <div class="quick-amounts">
+                        <button class="quick-amount-btn" onclick="simpleCashier.setAmount(20)">$20</button>
+                        <button class="quick-amount-btn" onclick="simpleCashier.setAmount(50)">$50</button>
+                        <button class="quick-amount-btn" onclick="simpleCashier.setAmount(100)">$100</button>
+                        <button class="quick-amount-btn" onclick="simpleCashier.setExactAmount()">Exact</button>
+                    </div>
                     <input type="number" id="receivedInput" placeholder="Amount received" step="0.01">
                     <div>Change: <span id="changeDisplay">$0.00</span></div>
                 </div>
@@ -42,28 +98,46 @@
             </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="cashier-layout">
-            <!-- Left Side - Orders List -->
-            <div class="orders-panel">
-                <h2>Ready Orders</h2>
-                <div class="orders-list" id="ordersList">
-                    <!-- Orders will load here -->
+        <!-- Manual Order Modal -->
+        <div id="manualOrderModal" class="modal" style="display: none;">
+            <div class="modal-content manual-order">
+                <div class="modal-header">
+                    <h3>Create Manual Order</h3>
+                    <button id="closeManualOrder" class="close-btn">&times;</button>
                 </div>
-            </div>
-            
-            <!-- Right Side - Selected Order Details -->
-            <div class="order-details-panel" id="orderDetailsPanel">
-                <div class="no-selection">
-                    <i class="fas fa-hand-pointer"></i>
-                    <h3>Select an Order</h3>
-                    <p>Click on an order from the left to view details and process payment</p>
+                
+                <div class="manual-order-content">
+                    <div class="menu-items-panel">
+                        <h4>Menu Items</h4>
+                        <div class="menu-search">
+                            <input type="text" id="menuSearch" placeholder="Search menu items...">
+                        </div>
+                        <div id="menuItemsList" class="menu-items-list">
+                            <!-- Menu items will load here -->
+                        </div>
+                    </div>
+                    
+                    <div class="order-builder-panel">
+                        <h4>Order Items</h4>
+                        <div id="orderItemsList" class="order-items-list">
+                            <div class="empty-order">No items added</div>
+                        </div>
+                        
+                        <div class="order-total">
+                            <strong>Total: <span id="manualOrderTotal">$0.00</span></strong>
+                        </div>
+                        
+                        <div class="manual-order-actions">
+                            <button id="printManualOrder" class="btn btn-success">Print Receipt</button>
+                            <button id="clearManualOrder" class="btn btn-secondary">Clear All</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-        <script src="/src/assets/js/config.js"></script>
+        <script src="/src/assets/js/config-public.js"></script>
         <script src="/src/assets/js/supabase.js"></script>
         <script src="/src/assets/js/cashier-simple.js"></script>
     </body>
