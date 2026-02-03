@@ -51,7 +51,7 @@ function setupEventListeners() {
 // Admin Navigation Functions
 function showSection(sectionName) {
     // Hide all sections
-    const sections = ['ordersSection', 'analyticsSection', 'menuSection'];
+    const sections = ['ordersSection', 'analyticsSection', 'advancedSection', 'menuSection'];
     sections.forEach(section => {
         const element = document.getElementById(section);
         if (element) {
@@ -87,6 +87,21 @@ function showSection(sectionName) {
                 loadReportsData();
             }
         }, 100);
+    } else if (sectionName === 'advanced') {
+        const advancedSection = document.getElementById('advancedSection');
+        if (advancedSection) {
+            advancedSection.style.display = 'block';
+        }
+        const advancedBtn = document.querySelector('[onclick="showSection(\'advanced\')"]');
+        if (advancedBtn) {
+            advancedBtn.classList.add('active');
+        }
+        // Load advanced analytics data
+        setTimeout(() => {
+            if (typeof loadAdvancedAnalytics === 'function') {
+                loadAdvancedAnalytics();
+            }
+        }, 100);
     } else if (sectionName === 'menu') {
         const menuSection = document.getElementById('menuSection');
         if (menuSection) {
@@ -106,14 +121,51 @@ async function loadOrders() {
     }
     
     try {
-        const { data, error } = await window.supabaseClient
-            .from('orders')
-            .select('*')
-            .order('created_at', { ascending: false });
-            
-        if (error) throw error;
-        renderOrders(data || []);
-        updateOrderStats(data || []);
+        // Fetch orders, order items, and menu items
+        const [ordersResult, orderItemsResult, menuItemsResult] = await Promise.all([
+            window.supabaseClient
+                .from('orders')
+                .select('*')
+                .order('created_at', { ascending: false }),
+            window.supabaseClient
+                .from('order_items')
+                .select('*'),
+            window.supabaseClient
+                .from('menu_items')
+                .select('*')
+        ]);
+        
+        if (ordersResult.error) throw ordersResult.error;
+        if (orderItemsResult.error) throw orderItemsResult.error;
+        if (menuItemsResult.error) throw menuItemsResult.error;
+        
+        const orders = ordersResult.data || [];
+        const orderItems = orderItemsResult.data || [];
+        const menuItems = menuItemsResult.data || [];
+        
+        // Create menu items lookup
+        const menuLookup = {};
+        menuItems.forEach(item => {
+            menuLookup[item.id] = item;
+        });
+        
+        // Join orders with their items and menu details
+        const ordersWithItems = orders.map(order => {
+            const items = orderItems
+                .filter(item => item.order_id === order.id)
+                .map(item => {
+                    const menuItem = menuLookup[item.menu_item_id];
+                    return {
+                        ...item,
+                        name: menuItem ? menuItem.name : 'Unknown Item',
+                        price: item.price || (menuItem ? menuItem.price : 0)
+                    };
+                });
+            return { ...order, items };
+        });
+        
+        renderOrders(ordersWithItems);
+        updateOrderStats(ordersWithItems);
     } catch (error) {
         console.error('Error loading orders:', error);
         document.getElementById('ordersGrid').innerHTML = '<div class="empty-state">Failed to load orders: ' + error.message + '</div>';
@@ -240,7 +292,7 @@ async function deleteOrder(orderId) {
     
     try {
         // Delete order items first
-        const { error: itemsError } = await window.supabaseClientClient
+        const { error: itemsError } = await window.supabaseClient
             .from('order_items')
             .delete()
             .eq('order_id', orderId);

@@ -45,6 +45,7 @@
             <div class="admin-nav">
                 <button class="nav-btn active" onclick="showSection('orders')">Orders</button>
                 <button class="nav-btn" onclick="showSection('analytics')">Analytics</button>
+                <button class="nav-btn" onclick="showSection('advanced')">Advanced Analytics</button>
                 <button class="nav-btn" onclick="showSection('menu')">Menu Management</button>
             </div>
             
@@ -79,7 +80,12 @@
             <!-- Reports & Analytics Section -->
             <div class="admin-header" style="margin-top: 4rem; display: flex; justify-content: space-between; align-items: center;">
                 <h1><i class="fas fa-chart-line"></i> Reports & Analytics Dashboard</h1>
-                <div class="date-filter">
+                <div class="filter-controls">
+                    <select id="orderTypeFilter">
+                        <option value="all">All Orders</option>
+                        <option value="regular">Table Orders</option>
+                        <option value="manual">Manual Orders</option>
+                    </select>
                     <select id="dateRange">
                         <option value="today">Today</option>
                         <option value="week">This Week</option>
@@ -88,6 +94,34 @@
                     </select>
                 </div>
             </div>
+            
+            <style>
+            .filter-controls {
+                display: flex;
+                gap: 10px;
+            }
+            .filter-controls select {
+                padding: 8px 12px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                background: white;
+            }
+            .order-type-badge {
+                padding: 4px 8px;
+                border-radius: 12px;
+                font-size: 0.8em;
+                font-weight: 600;
+                text-transform: uppercase;
+            }
+            .order-type-badge.manual {
+                background: #e3f2fd;
+                color: #1976d2;
+            }
+            .order-type-badge.regular {
+                background: #f3e5f5;
+                color: #7b1fa2;
+            }
+            </style>
 
             <!-- Key Metrics -->
             <div class="admin-stats" id="analyticsStats">
@@ -142,6 +176,7 @@
                             <thead>
                                 <tr>
                                     <th>Order ID</th>
+                                    <th>Type</th>
                                     <th>Table</th>
                                     <th>Customer</th>
                                     <th>Items</th>
@@ -178,6 +213,126 @@
                 </div>
             </div>
         </div>
+            
+            <!-- Advanced Analytics Section -->
+            <div id="advancedSection" class="admin-section-content" style="display: none;">
+                <div class="admin-header">
+                    <h1><i class="fas fa-brain"></i> Advanced Business Intelligence</h1>
+                    <div class="advanced-filters">
+                        <select id="advancedTimeRange">
+                            <option value="7">Last 7 Days</option>
+                            <option value="30" selected>Last 30 Days</option>
+                            <option value="90">Last 90 Days</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Peak Hours Analysis -->
+                <div class="analytics-row">
+                    <div class="chart-container">
+                        <h3><i class="fas fa-clock"></i> Peak Hours Heatmap</h3>
+                        <canvas id="peakHoursChart"></canvas>
+                    </div>
+                    <div class="insights-panel">
+                        <h3><i class="fas fa-lightbulb"></i> Business Insights</h3>
+                        <div id="businessInsights">
+                            <div class="insight-card">
+                                <h4>Busiest Hour</h4>
+                                <p id="busiestHour">Loading...</p>
+                            </div>
+                            <div class="insight-card">
+                                <h4>Slowest Hour</h4>
+                                <p id="slowestHour">Loading...</p>
+                            </div>
+                            <div class="insight-card">
+                                <h4>Weekend vs Weekday</h4>
+                                <p id="weekendComparison">Loading...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Method & Order Type Analysis -->
+                <div class="analytics-row">
+                    <div class="chart-container">
+                        <h3><i class="fas fa-credit-card"></i> Payment Methods Trend</h3>
+                        <canvas id="paymentTrendChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3><i class="fas fa-chart-pie"></i> Order Type Distribution</h3>
+                        <canvas id="orderTypeChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Customer Behavior Analysis -->
+                <div class="analytics-row">
+                    <div class="chart-container">
+                        <h3><i class="fas fa-users"></i> Order Size Distribution</h3>
+                        <canvas id="orderSizeChart"></canvas>
+                    </div>
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <h4>Avg Order Value</h4>
+                            <div class="metric-value" id="advancedAvgOrderValue">$0.00</div>
+                            <div class="metric-change" id="advancedAvgOrderChange">+0%</div>
+                        </div>
+                        <div class="metric-card">
+                            <h4>Orders per Hour</h4>
+                            <div class="metric-value" id="advancedOrdersPerHour">0</div>
+                            <div class="metric-change" id="advancedOrdersPerHourChange">+0%</div>
+                        </div>
+                        <div class="metric-card">
+                            <h4>Peak Day Revenue</h4>
+                            <div class="metric-value" id="advancedPeakDayRevenue">$0.00</div>
+                            <div class="metric-change" id="advancedPeakDayChange">+0%</div>
+                        </div>
+                        <div class="metric-card">
+                            <h4>Menu Item Variety</h4>
+                            <div class="metric-value" id="advancedMenuVariety">0</div>
+                            <div class="metric-change" id="advancedVarietyChange">+0%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profitability Analysis -->
+                <div class="analytics-row">
+                    <div class="table-container" style="flex: 2;">
+                        <h3><i class="fas fa-dollar-sign"></i> Menu Item Performance Matrix</h3>
+                        <div style="margin-bottom: 1rem;">
+                            <select id="performanceFilter">
+                                <option value="all">All Performance</option>
+                                <option value="high">High Performance</option>
+                                <option value="medium">Medium Performance</option>
+                                <option value="low">Low Performance</option>
+                            </select>
+                        </div>
+                        <div class="table-wrapper">
+                            <table id="performanceMatrix">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Orders</th>
+                                        <th>Revenue</th>
+                                        <th>Avg Price</th>
+                                        <th>Performance</th>
+                                        <th>Trend</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="performanceMatrixBody">
+                                    <!-- Data will load here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="recommendations-panel">
+                        <h3><i class="fas fa-chart-line"></i> AI Recommendations</h3>
+                        <div id="aiRecommendations">
+                            <!-- Recommendations will load here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div id="menuSection" class="admin-section-content" style="display: none;">
             <div class="admin-header" style="margin-top: 4rem;">
                 <h1>Menu Management</h1>
@@ -252,7 +407,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/src/assets/js/config.js"></script>
+    <script src="/src/assets/js/config-public.js"></script>
     <script src="/src/assets/js/supabase.js"></script>
     <script src="/src/assets/js/main.js"></script>
     <script src="/src/assets/js/admin.js"></script>

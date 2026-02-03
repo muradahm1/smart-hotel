@@ -13,6 +13,7 @@ class SimpleCashier {
         console.log('🏪 Simple Cashier System Starting...');
         this.setupEventListeners();
         await this.loadOrders();
+        this.setupRealTimeUpdates();
         console.log('✅ Simple Cashier Ready');
     }
 
@@ -143,20 +144,37 @@ class SimpleCashier {
     async updateStats() {
         try {
             const today = new Date().toISOString().split('T')[0];
+            let totalSales = 0;
+            let orderCount = 0;
+            let readyCount = 0;
             
-            const { data: transactions } = await supabaseClient
-                .from('transactions')
-                .select('amount')
-                .gte('created_at', today + 'T00:00:00');
+            // Try to get data from database
+            try {
+                const { data: transactions } = await supabaseClient
+                    .from('transactions')
+                    .select('amount')
+                    .gte('created_at', today + 'T00:00:00');
 
-            const { data: readyOrders } = await supabaseClient
-                .from('orders')
-                .select('id')
-                .eq('status', 'ready');
+                const { data: readyOrders } = await supabaseClient
+                    .from('orders')
+                    .select('id')
+                    .eq('status', 'ready');
 
-            const totalSales = transactions?.reduce((sum, t) => sum + parseFloat(t.amount), 0) || 0;
-            const orderCount = transactions?.length || 0;
-            const readyCount = readyOrders?.length || 0;
+                if (transactions) {
+                    totalSales = transactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
+                    orderCount = transactions.length;
+                }
+                if (readyOrders) {
+                    readyCount = readyOrders.length;
+                }
+            } catch (dbError) {
+                console.warn('Database stats failed, using localStorage:', dbError);
+            }
+            
+            // Add localStorage data (for manual orders and offline tracking)
+            const localStats = this.getLocalStats();
+            totalSales += localStats.sales;
+            orderCount += localStats.orders;
 
             document.getElementById('todaySales').textContent = this.formatCurrency(totalSales);
             document.getElementById('orderCount').textContent = orderCount;
@@ -164,8 +182,10 @@ class SimpleCashier {
             
         } catch (error) {
             console.error('Failed to update stats:', error);
-            document.getElementById('todaySales').textContent = '$0.00';
-            document.getElementById('orderCount').textContent = '0';
+            // Fallback to localStorage only
+            const localStats = this.getLocalStats();
+            document.getElementById('todaySales').textContent = this.formatCurrency(localStats.sales);
+            document.getElementById('orderCount').textContent = localStats.orders;
             document.getElementById('readyCount').textContent = '0';
         }
     }
@@ -354,12 +374,21 @@ class SimpleCashier {
         }
 
         try {
+            // Get cashier name from database
+            let cashierName = 'Demo Cashier';
+            try {
+                const { data } = await supabaseClient.rpc('get_cashier_name');
+                if (data) cashierName = data;
+            } catch (e) {
+                console.warn('Could not get cashier name:', e);
+            }
+            
             const transaction = {
                 order_id: this.currentOrder.id,
                 payment_method: this.selectedPaymentMethod,
                 amount: total,
                 change_amount: Math.max(0, received - total),
-                cashier: 'Demo Cashier',
+                cashier: cashierName,
                 created_at: new Date().toISOString()
             };
 
@@ -389,6 +418,9 @@ class SimpleCashier {
                 console.warn('Order update failed:', orderError);
             }
 
+            // Track in localStorage for stats
+            this.addToLocalStats(total);
+
             this.lastTransaction = { order: this.currentOrder, transaction };
             this.printReceipt(this.currentOrder, transaction);
             this.showNotification('Payment processed successfully!', 'success');
@@ -396,6 +428,7 @@ class SimpleCashier {
             setTimeout(() => {
                 this.closeModal();
                 this.loadOrders();
+                this.updateStats();
             }, 1000);
             
         } catch (error) {
@@ -768,7 +801,7 @@ class SimpleCashier {
         this.updateManualOrderDisplay();
     }
     
-    printManualOrder() {
+    async printManualOrder() {
         if (this.manualOrderItems.length === 0) {
             this.showNotification('No items to print', 'error');
             return;
@@ -776,6 +809,77 @@ class SimpleCashier {
         
         const total = this.manualOrderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         
+        try {
+            // Get cashier name
+            let cashierName = 'Demo Cashier';
+            try {
+                const { data } = await supabaseClient.rpc('get_cashier_name');
+                if (data) cashierName = data;
+            } catch (e) {
+                console.warn('Could not get cashier name:', e);
+            }
+            
+            // Create order in database
+            const orderData = {
+                table_number: null,
+                customer_name: 'Walk-in',
+                total_amount: total,
+                status: 'completed',
+                order_type: 'manual',
+                created_at: new Date().toISOString()
+            };
+            
+            const { data: newOrder, error: orderError } = await supabaseClient
+                .from('orders')
+                .insert([orderData])
+                .select()
+                .single();
+                
+            if (orderError) {
+                console.warn('Failed to save manual order:', orderError);
+            }
+            
+            // Create order items if order was saved
+            if (newOrder) {
+                const orderItems = this.manualOrderItems.map(item => ({
+                    order_id: newOrder.id,
+                    menu_item_id: item.id,
+                    quantity: item.quantity,
+                    price: item.price
+                }));
+                
+                const { error: itemsError } = await supabaseClient
+                    .from('order_items')
+                    .insert(orderItems);
+                    
+                if (itemsError) {
+                    console.warn('Failed to save order items:', itemsError);
+                }
+                
+                // Create transaction record
+                const transactionData = {
+                    order_id: newOrder.id,
+                    payment_method: 'cash',
+                    amount: total,
+                    change_amount: 0,
+                    cashier: cashierName,
+                    created_at: new Date().toISOString()
+                };
+                
+                const { error: transactionError } = await supabaseClient
+                    .from('transactions')
+                    .insert([transactionData]);
+                    
+                if (transactionError) {
+                    console.warn('Failed to save transaction:', transactionError);
+                }
+            }
+            
+        } catch (error) {
+            console.warn('Database save failed for manual order:', error);
+        }
+        
+        // Create order object for receipt
         const manualOrder = {
             id: 'manual-' + Date.now(),
             table_number: null,
@@ -796,9 +900,13 @@ class SimpleCashier {
             created_at: new Date().toISOString()
         };
         
+        // Track in localStorage for stats
+        this.addToLocalStats(total);
+        
         this.printReceipt(manualOrder, transaction);
-        this.showNotification('Manual order receipt printed!', 'success');
+        this.showNotification('Manual order saved and printed!', 'success');
         this.closeManualOrderModal();
+        this.updateStats();
     }
 
     formatCurrency(amount) {
@@ -837,6 +945,81 @@ class SimpleCashier {
             notification.style.animation = 'slideOut 0.3s ease';
             setTimeout(() => notification.remove(), 300);
         }, 3000);
+    }
+    
+    getLocalStats() {
+        try {
+            const today = new Date().toISOString().split('T')[0];
+            const stats = JSON.parse(localStorage.getItem('dailyStats') || '{}');
+            return stats[today] || { sales: 0, orders: 0 };
+        } catch (error) {
+            return { sales: 0, orders: 0 };
+        }
+    }
+    
+    addToLocalStats(amount) {
+        try {
+            const today = new Date().toISOString().split('T')[0];
+            const allStats = JSON.parse(localStorage.getItem('dailyStats') || '{}');
+            const todayStats = allStats[today] || { sales: 0, orders: 0 };
+            
+            todayStats.sales += parseFloat(amount);
+            todayStats.orders += 1;
+            
+            allStats[today] = todayStats;
+            localStorage.setItem('dailyStats', JSON.stringify(allStats));
+        } catch (error) {
+            console.warn('Failed to save local stats:', error);
+        }
+    }
+    
+    setupRealTimeUpdates() {
+        if (!window.supabaseClient) {
+            console.warn('No Supabase client - using polling fallback');
+            this.startPolling();
+            return;
+        }
+        
+        try {
+            // Subscribe to orders table changes
+            const ordersSubscription = supabaseClient
+                .channel('orders-changes')
+                .on('postgres_changes', 
+                    { event: '*', schema: 'public', table: 'orders' },
+                    (payload) => {
+                        console.log('Order change detected:', payload);
+                        this.handleOrderChange(payload);
+                    }
+                )
+                .subscribe();
+                
+            console.log('✅ Real-time subscriptions active');
+        } catch (error) {
+            console.warn('Real-time setup failed, using polling:', error);
+            this.startPolling();
+        }
+    }
+    
+    startPolling() {
+        // Fallback: poll every 30 seconds
+        setInterval(() => {
+            this.loadOrders();
+        }, 30000);
+        console.log('📡 Polling mode active (30s intervals)');
+    }
+    
+    handleOrderChange(payload) {
+        const { eventType, new: newRecord, old: oldRecord } = payload;
+        
+        if (eventType === 'INSERT' && newRecord.status === 'ready') {
+            this.showNotification(`New order ready: Table ${newRecord.table_number}`, 'info');
+            this.loadOrders();
+        } else if (eventType === 'UPDATE') {
+            if (newRecord.status === 'ready' && oldRecord.status !== 'ready') {
+                this.showNotification(`Order ready: Table ${newRecord.table_number}`, 'info');
+            }
+            this.loadOrders();
+        }
     }
 }
 
