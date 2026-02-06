@@ -5,6 +5,7 @@
     { "source": "/order", "destination": "/src/pages/order.html" },
     { "source": "/admin", "destination": "/src/pages/admin.html" },
     { "source": "/chef", "destination": "/src/pages/chef.html" },
+    { "source": "/cashier", "destination": "/src/pages/cashier.html" },
     { "source": "/hostess", "destination": "/src/pages/hostess.html" },
     { "source": "/login", "destination": "/src/pages/login.html" },
     { "source": "/room", "destination": "/src/pages/room.html" },
