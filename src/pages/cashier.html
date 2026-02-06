@@ -4,6 +4,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Cashier | RAMZ</title>
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
         <link rel="manifest" href="/cashier-manifest.json">
         <meta name="theme-color" content="#c9b48c">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -23,6 +24,9 @@
             </button>
             <button id="manualPrintBtn" class="btn btn-secondary">
                 <i class="fas fa-receipt"></i> Manual Print
+            </button>
+            <button id="installBtn" class="btn btn-primary" style="display: none;">
+                <i class="fas fa-download"></i> Install App
             </button>
         </div>
 
@@ -140,5 +144,70 @@
         <script src="/src/assets/js/config-public.js"></script>
         <script src="/src/assets/js/supabase.js"></script>
         <script src="/src/assets/js/cashier-simple.js"></script>
+        <script>
+            // PWA Install functionality
+            let deferredPrompt;
+            const installBtn = document.getElementById('installBtn');
+            
+            // Check if running in standalone mode (launched as app)
+            function isRunningStandalone() {
+                return (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone);
+            }
+            
+            // Handle the install prompt
+            window.addEventListener('beforeinstallprompt', (e) => {
+                console.log('👍 PWA Install Prompt intercepted! App is installable.');
+                e.preventDefault();
+                deferredPrompt = e;
+                
+                // If event fires, app is not installed. Clear any stale local storage.
+                localStorage.removeItem('pwa-installed');
+                
+                installBtn.style.display = 'inline-block';
+                installBtn.disabled = false;
+                installBtn.innerHTML = '<i class="fas fa-download"></i> Install App';
+            });
+            
+            // Handle install button click
+            installBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                    }
+                    deferredPrompt = null;
+                }
+            });
+            
+            // Listen for successful install
+            window.addEventListener('appinstalled', () => {
+                console.log('PWA was installed');
+                localStorage.setItem('pwa-installed', 'true');
+                installBtn.style.display = 'none';
+            });
+            
+            // Check on load if already installed
+            window.addEventListener('load', () => {
+                if (isRunningStandalone()) {
+                    installBtn.style.display = 'none';
+                } else if (localStorage.getItem('pwa-installed') === 'true') {
+                    installBtn.innerHTML = '<i class="fas fa-check-circle"></i> App Installed';
+                    installBtn.disabled = true;
+                    installBtn.style.display = 'inline-block';
+                } else {
+                    console.log('PWA not yet installable or already installed. Check console for "beforeinstallprompt".');
+                }
+            });
+            
+            // Register Service Worker
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/cashier-sw.js')
+                        .then(reg => console.log('Service Worker registered'))
+                        .catch(err => console.log('Service Worker registration failed:', err));
+                });
+            }
+        </script>
     </body>
 </html>
