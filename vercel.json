@@ -10,5 +10,20 @@
     { "source": "/login", "destination": "/src/pages/login.html" },
     { "source": "/room", "destination": "/src/pages/room.html" },
     { "source": "/table", "destination": "/src/pages/table.html" }
+  ],
+  "headers": [
+    {
+      "source": "/cashier-sw.js",
+      "headers": [
+        { "key": "Service-Worker-Allowed", "value": "/" },
+        { "key": "Cache-Control", "value": "max-age=0, no-cache" }
+      ]
+    },
+    {
+      "source": "/src/assets/images/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    }
   ]
 }
