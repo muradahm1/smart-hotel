@@ -143,6 +143,7 @@
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
         <script src="/src/assets/js/config-public.js"></script>
         <script src="/src/assets/js/supabase.js"></script>
+        <script src="/src/assets/js/offline-cache.js"></script>
         <script src="/src/assets/js/cashier-simple.js"></script>
         <script>
             // PWA Install functionality
@@ -202,11 +203,48 @@
             
             // Register Service Worker
             if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('/cashier-sw.js')
-                        .then(reg => console.log('Service Worker registered'))
-                        .catch(err => console.log('Service Worker registration failed:', err));
-                });
+                navigator.serviceWorker.register('/cashier-sw.js')
+                    .then(registration => {
+                        console.log('✅ Service Worker registered:', registration.scope);
+                        
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    if (confirm('New version available! Reload to update?')) {
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(err => console.error('❌ Service Worker failed:', err));
+            }
+            
+            // Online/Offline status
+            window.addEventListener('online', () => {
+                console.log('📡 Back online');
+                if (window.simpleCashier) {
+                    window.simpleCashier.showNotification('Back online - syncing data...', 'success');
+                    window.simpleCashier.loadOrders();
+                }
+            });
+            
+            window.addEventListener('offline', () => {
+                console.log('📴 Offline mode');
+                if (window.simpleCashier) {
+                    window.simpleCashier.showNotification('Offline mode - orders cached locally', 'info');
+                }
+            });
+            
+            // Display connection status
+            if (!navigator.onLine) {
+                setTimeout(() => {
+                    if (window.simpleCashier) {
+                        window.simpleCashier.showNotification('Working offline', 'info');
+                    }
+                }, 2000);
             }
         </script>
     </body>

@@ -1,8 +1,10 @@
 {
-  "name": "RAMZ Cashier",
-  "short_name": "Cashier",
+  "name": "RAMZ Cashier System",
+  "short_name": "RAMZ Cashier",
+  "description": "Professional cashier and order management system",
   "start_url": "/src/pages/cashier.html",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#1a1a1a",
   "theme_color": "#c9b48c",
   "scope": "/",
@@ -10,12 +12,31 @@
     {
       "src": "/src/assets/images/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/src/assets/images/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Ready Orders",
+      "short_name": "Orders",
+      "description": "View ready orders",
+      "url": "/src/pages/cashier.html",
+      "icons": [{ "src": "/src/assets/images/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Manual Order",
+      "short_name": "Manual",
+      "description": "Create manual order",
+      "url": "/src/pages/cashier.html?action=manual",
+      "icons": [{ "src": "/src/assets/images/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

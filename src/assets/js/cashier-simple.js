@@ -6,6 +6,7 @@ class SimpleCashier {
         this.lastTransaction = null;
         this.manualOrderItems = [];
         this.allMenuItems = [];
+        this.offlineCache = new OfflineOrderCache();
         this.init();
     }
 
@@ -14,7 +15,23 @@ class SimpleCashier {
         this.setupEventListeners();
         await this.loadOrders();
         this.setupRealTimeUpdates();
+        this.syncOfflineData();
         console.log('✅ Simple Cashier Ready');
+    }
+    
+    async syncOfflineData() {
+        if (navigator.onLine && window.supabaseClient) {
+            try {
+                const synced = await this.offlineCache.syncPendingTransactions();
+                if (synced.length > 0) {
+                    console.log(`✅ Synced ${synced.length} offline transactions`);
+                    this.showNotification(`Synced ${synced.length} offline transactions`, 'success');
+                }
+                await this.offlineCache.clearOldCache(7);
+            } catch (error) {
+                console.warn('Sync failed:', error);
+            }
+        }
     }
 
     setupEventListeners() {
@@ -60,9 +77,11 @@ class SimpleCashier {
         try {
             console.log('Loading orders...');
             
-            if (!window.supabaseClient) {
-                console.error('Supabase client not initialized');
-                this.showTestOrders();
+            if (!window.supabaseClient || !navigator.onLine) {
+                console.log('Offline - loading from cache');
+                const cachedOrders = await this.offlineCache.getCachedOrders('ready');
+                this.renderOrders(cachedOrders);
+                this.updateStats();
                 return;
             }
             
@@ -80,17 +99,27 @@ class SimpleCashier {
 
             if (error) {
                 console.error('Database error:', error);
-                this.showTestOrders();
+                const cachedOrders = await this.offlineCache.getCachedOrders('ready');
+                this.renderOrders(cachedOrders);
                 return;
             }
 
             console.log('Orders loaded:', orders);
+            
+            // Cache orders for offline use
+            if (orders && orders.length > 0) {
+                for (const order of orders) {
+                    await this.offlineCache.cacheOrder(order);
+                }
+            }
+            
             this.renderOrders(orders || []);
             this.updateStats();
             
         } catch (error) {
             console.error('Failed to load orders:', error);
-            this.showTestOrders();
+            const cachedOrders = await this.offlineCache.getCachedOrders('ready');
+            this.renderOrders(cachedOrders);
         }
     }
     
@@ -374,7 +403,6 @@ class SimpleCashier {
         }
 
         try {
-            // Get cashier name from database
             let cashierName = 'Demo Cashier';
             try {
                 const { data } = await supabaseClient.rpc('get_cashier_name');
@@ -392,35 +420,43 @@ class SimpleCashier {
                 created_at: new Date().toISOString()
             };
 
-            // Try to insert transaction (may fail due to RLS)
-            try {
-                const { error: transactionError } = await supabaseClient
-                    .from('transactions')
-                    .insert([transaction]);
-                    
-                if (transactionError) {
-                    console.warn('Transaction insert failed (RLS policy):', transactionError);
+            // Try online sync first
+            if (navigator.onLine && window.supabaseClient) {
+                try {
+                    const { error: transactionError } = await supabaseClient
+                        .from('transactions')
+                        .insert([transaction]);
+                        
+                    if (transactionError) {
+                        console.warn('Transaction insert failed, caching offline:', transactionError);
+                        await this.offlineCache.cachePendingTransaction(transaction);
+                    }
+                } catch (transactionErr) {
+                    console.warn('Transaction failed, caching offline:', transactionErr);
+                    await this.offlineCache.cachePendingTransaction(transaction);
                 }
-            } catch (transactionErr) {
-                console.warn('Transaction insert failed:', transactionErr);
-            }
-            
-            // Update order status
-            const { error: orderError } = await supabaseClient
-                .from('orders')
-                .update({ 
-                    status: 'completed',
-                    updated_at: new Date().toISOString()
-                })
-                .eq('id', this.currentOrder.id);
                 
-            if (orderError) {
-                console.warn('Order update failed:', orderError);
+                const { error: orderError } = await supabaseClient
+                    .from('orders')
+                    .update({ 
+                        status: 'completed',
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', this.currentOrder.id);
+                    
+                if (orderError) {
+                    console.warn('Order update failed:', orderError);
+                }
+                
+                // Remove from offline cache
+                await this.offlineCache.removeOrder(this.currentOrder.id);
+            } else {
+                // Offline - cache transaction
+                await this.offlineCache.cachePendingTransaction(transaction);
+                this.showNotification('Payment saved offline - will sync when online', 'info');
             }
 
-            // Track in localStorage for stats
             this.addToLocalStats(total);
-
             this.lastTransaction = { order: this.currentOrder, transaction };
             this.printReceipt(this.currentOrder, transaction);
             this.showNotification('Payment processed successfully!', 'success');
@@ -627,6 +663,16 @@ class SimpleCashier {
         console.log('Loading menu items from database...');
         
         try {
+            // Try cache first if offline
+            if (!navigator.onLine) {
+                const cachedItems = await this.offlineCache.getCachedMenuItems();
+                if (cachedItems.length > 0) {
+                    this.allMenuItems = cachedItems;
+                    this.renderMenuItems(this.allMenuItems);
+                    return;
+                }
+            }
+            
             let { data: menuItems, error } = await supabaseClient
                 .from('menu_items')
                 .select('*')
@@ -645,12 +691,21 @@ class SimpleCashier {
             if (menuItems && menuItems.length > 0) {
                 console.log('Database menu items loaded:', menuItems);
                 this.allMenuItems = menuItems;
+                await this.offlineCache.cacheMenuItems(menuItems);
                 this.renderMenuItems(this.allMenuItems);
                 return;
             }
             
         } catch (error) {
             console.error('Failed to load menu items from database:', error);
+            
+            // Try cache
+            const cachedItems = await this.offlineCache.getCachedMenuItems();
+            if (cachedItems.length > 0) {
+                this.allMenuItems = cachedItems;
+                this.renderMenuItems(this.allMenuItems);
+                return;
+            }
         }
         
         console.log('Using fallback test menu items');
