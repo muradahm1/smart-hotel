@@ -411,12 +411,16 @@ class SimpleCashier {
                 console.warn('Could not get cashier name:', e);
             }
             
+            // Get current shift ID to link this transaction to the active shift
+            const shiftId = localStorage.getItem('current_shift_id');
+            
             const transaction = {
                 order_id: this.currentOrder.id,
                 payment_method: this.selectedPaymentMethod,
                 amount: total,
                 change_amount: Math.max(0, received - total),
                 cashier: cashierName,
+                shift_id: shiftId, // Link to shift
                 created_at: new Date().toISOString()
             };
 
@@ -874,6 +878,9 @@ class SimpleCashier {
                 console.warn('Could not get cashier name:', e);
             }
             
+            // Get current shift ID
+            const shiftId = localStorage.getItem('current_shift_id');
+            
             // Create order in database
             const orderData = {
                 table_number: null,
@@ -918,6 +925,7 @@ class SimpleCashier {
                     amount: total,
                     change_amount: 0,
                     cashier: cashierName,
+                    shift_id: shiftId, // Link to shift
                     created_at: new Date().toISOString()
                 };
                 

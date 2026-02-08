@@ -29,6 +29,16 @@ function initializeAdminNavigation() {
             }
         });
     });
+    
+    // Dynamically add Shifts button if it doesn't exist
+    const navContainer = document.querySelector('.admin-nav');
+    if (navContainer && !document.querySelector('[onclick="showSection(\'shifts\')"]')) {
+        const btn = document.createElement('button');
+        btn.className = 'nav-btn';
+        btn.setAttribute('onclick', "showSection('shifts')");
+        btn.textContent = 'Shifts';
+        navContainer.appendChild(btn);
+    }
 }
 
 // Make showSection globally available
@@ -51,7 +61,7 @@ function setupEventListeners() {
 // Admin Navigation Functions
 function showSection(sectionName) {
     // Hide all sections
-    const sections = ['ordersSection', 'analyticsSection', 'advancedSection', 'menuSection'];
+    const sections = ['ordersSection', 'analyticsSection', 'advancedSection', 'menuSection', 'shiftsSection'];
     sections.forEach(section => {
         const element = document.getElementById(section);
         if (element) {
@@ -110,6 +120,21 @@ function showSection(sectionName) {
         const menuBtn = document.querySelector('[onclick="showSection(\'menu\')"]');
         if (menuBtn) {
             menuBtn.classList.add('active');
+        }
+    } else if (sectionName === 'shifts') {
+        let shiftsSection = document.getElementById('shiftsSection');
+        if (!shiftsSection) {
+            createShiftsSection();
+            shiftsSection = document.getElementById('shiftsSection');
+        }
+        
+        if (shiftsSection) {
+            shiftsSection.style.display = 'block';
+            const shiftsBtn = document.querySelector('[onclick="showSection(\'shifts\')"]');
+            if (shiftsBtn) {
+                shiftsBtn.classList.add('active');
+            }
+            loadShifts();
         }
     }
 }
@@ -661,4 +686,97 @@ function showNotification(message, type = 'info') {
     setTimeout(() => {
         notification.remove();
     }, 5000);
+}
+
+// --- Shift Management Functions ---
+
+function createShiftsSection() {
+    // Find a container to append the new section to (usually after ordersSection)
+    const ordersSection = document.getElementById('ordersSection');
+    const container = ordersSection ? ordersSection.parentNode : document.querySelector('.container');
+    
+    if (!container) return;
+    
+    const section = document.createElement('div');
+    section.id = 'shiftsSection';
+    section.style.display = 'none';
+    section.className = 'admin-section-content';
+    
+    section.innerHTML = `
+        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h2 style="color: var(--accent-gold);">Staff Shifts</h2>
+            <button class="btn btn-secondary" onclick="loadShifts()">
+                <i class="fas fa-sync"></i> Refresh
+            </button>
+        </div>
+        <div class="table-container" style="background: var(--background-light); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-light);">
+            <div class="table-wrapper" style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; min-width: 800px;">
+                    <thead>
+                        <tr>
+                            <th style="text-align: left; padding: 1rem; border-bottom: 1px solid #333; color: var(--accent-gold);">Staff</th>
+                            <th style="text-align: left; padding: 1rem; border-bottom: 1px solid #333; color: var(--accent-gold);">Role</th>
+                            <th style="text-align: left; padding: 1rem; border-bottom: 1px solid #333; color: var(--accent-gold);">Start Time</th>
+                            <th style="text-align: left; padding: 1rem; border-bottom: 1px solid #333; color: var(--accent-gold);">End Time</th>
+                            <th style="text-align: left; padding: 1rem; border-bottom: 1px solid #333; color: var(--accent-gold);">Orders</th>
+                            <th style="text-align: left; padding: 1rem; border-bottom: 1px solid #333; color: var(--accent-gold);">Sales</th>
+                            <th style="text-align: left; padding: 1rem; border-bottom: 1px solid #333; color: var(--accent-gold);">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="shiftsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    `;
+    
+    container.appendChild(section);
+}
+
+async function loadShifts() {
+    if (!window.supabaseClient) return;
+    
+    const tbody = document.getElementById('shiftsTableBody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;">Loading shifts...</td></tr>';
+
+    try {
+        // 1. Get shifts
+        const { data: shifts, error: shiftsError } = await window.supabaseClient
+            .from('shifts')
+            .select('*')
+            .order('start_time', { ascending: false })
+            .limit(50);
+
+        if (shiftsError) throw shiftsError;
+
+        if (!shifts || shifts.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;">No shifts recorded yet</td></tr>';
+            return;
+        }
+
+        // 2. Render
+        tbody.innerHTML = shifts.map(shift => {
+            const start = new Date(shift.start_time).toLocaleString();
+            const end = shift.end_time ? new Date(shift.end_time).toLocaleString() : '-';
+            const statusColor = shift.status === 'active' ? '#4caf50' : '#9e9e9e';
+            const salesDisplay = typeof formatCurrency === 'function' ? formatCurrency(shift.total_sales || 0) : `$${(shift.total_sales || 0).toFixed(2)}`;
+            
+            return `
+                <tr style="border-bottom: 1px solid #333; transition: background 0.2s;">
+                    <td style="padding: 1rem;">${shift.role.toUpperCase()} (ID: ...${shift.user_id.slice(-4)})</td>
+                    <td style="padding: 1rem;"><span style="background: #333; padding: 4px 10px; border-radius: 12px; font-size: 0.85em;">${shift.role}</span></td>
+                    <td style="padding: 1rem;">${start}</td>
+                    <td style="padding: 1rem;">${end}</td>
+                    <td style="padding: 1rem;">${shift.total_orders || 0}</td>
+                    <td style="padding: 1rem;">${salesDisplay}</td>
+                    <td style="padding: 1rem;"><span style="color: ${statusColor}; font-weight: bold; text-transform: uppercase; font-size: 0.9em;">${shift.status}</span></td>
+                </tr>
+            `;
+        }).join('');
+
+    } catch (error) {
+        console.error('Error loading shifts:', error);
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #ff4444; padding: 2rem;">Error: ${error.message}</td></tr>`;
+    }
 }
