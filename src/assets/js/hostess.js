@@ -36,6 +36,11 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         loadOrders();
         listenForOrderUpdates();
+        // Fallback polling every 30 seconds (matches Chef dashboard reliability)
+        setInterval(() => {
+            console.log('🔄 Polling for updates...');
+            loadOrders();
+        }, 30000);
     }, 500);
 });
 
@@ -63,11 +68,11 @@ function playNotificationSound() {
     gainNode.connect(audioContext.destination);
     
     // Pleasant "Ding" for Front of House
-    oscillator.type = 'sine'; // Soft wave
-    oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+    oscillator.type = 'triangle'; // Richer tone to be heard over conversation
+    oscillator.frequency.setValueAtTime(660, audioContext.currentTime); // E5 (Clearer pitch)
     oscillator.frequency.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.5);
     
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
     gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 1.5);
 
     oscillator.start(audioContext.currentTime);
