@@ -504,15 +504,21 @@ function initScrollAnimations() {
     }, 1000);
     
     // Parallax effect for hero elements
+    let ticking = false;
     window.addEventListener('scroll', () => {
-        const scrolled = window.pageYOffset;
-        const parallaxElements = document.querySelectorAll('.parallax-element');
-        
-        parallaxElements.forEach(element => {
-            const speed = element.dataset.speed || 0.5;
-            const yPos = -(scrolled * speed);
-            element.style.transform = `translateY(${yPos}px)`;
-        });
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                const scrolled = window.pageYOffset;
+                const parallaxElements = document.querySelectorAll('.parallax-element');
+                parallaxElements.forEach(element => {
+                    const speed = element.dataset.speed || 0.5;
+                    const yPos = -(scrolled * speed);
+                    element.style.transform = `translateY(${yPos}px)`;
+                });
+                ticking = false;
+            });
+            ticking = true;
+        }
     });
 }
 
@@ -522,13 +528,20 @@ function initScrollToTop() {
     const homeBtn = document.querySelector('.home-btn');
     
     // Show/hide buttons based on scroll position
+    let ticking = false;
     window.addEventListener('scroll', () => {
-        if (window.pageYOffset > 300) {
-            if (scrollToTopBtn) scrollToTopBtn.classList.add('show');
-            if (homeBtn) homeBtn.classList.add('show');
-        } else {
-            if (scrollToTopBtn) scrollToTopBtn.classList.remove('show');
-            if (homeBtn) homeBtn.classList.remove('show');
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                if (window.pageYOffset > 300) {
+                    if (scrollToTopBtn) scrollToTopBtn.classList.add('show');
+                    if (homeBtn) homeBtn.classList.add('show');
+                } else {
+                    if (scrollToTopBtn) scrollToTopBtn.classList.remove('show');
+                    if (homeBtn) homeBtn.classList.remove('show');
+                }
+                ticking = false;
+            });
+            ticking = true;
         }
     });
     

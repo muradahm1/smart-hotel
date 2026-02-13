@@ -1,12 +1,78 @@
 // Waiters dashboard - no authentication required
 let orders = [];
+let audioContext;
+let audioEnabled = false;
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize audio permission system
+    const audioOverlay = document.getElementById('audio-permission-overlay');
+    const enableBtn = document.getElementById('enableAudioBtn');
+    const skipBtn = document.getElementById('skipAudioBtn');
+    
+    if (audioOverlay && enableBtn && skipBtn) {
+        // Check if user has already made a choice
+        const audioChoice = localStorage.getItem('waitersAudioEnabled');
+        if (audioChoice === 'true') {
+            audioOverlay.style.display = 'none';
+            initAudio();
+        } else if (audioChoice === 'false') {
+            audioOverlay.style.display = 'none';
+        } else {
+            audioOverlay.style.display = 'flex';
+        }
+        
+        enableBtn.addEventListener('click', function() {
+            localStorage.setItem('waitersAudioEnabled', 'true');
+            audioOverlay.style.display = 'none';
+            initAudio();
+        });
+        
+        skipBtn.addEventListener('click', function() {
+            localStorage.setItem('waitersAudioEnabled', 'false');
+            audioOverlay.style.display = 'none';
+        });
+    }
+
     setTimeout(() => {
         loadOrders();
         listenForOrderUpdates();
     }, 500);
 });
+
+function initAudio() {
+    try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        audioEnabled = true;
+        console.log('Audio context initialized for Waiters');
+    } catch (e) {
+        console.error('Web Audio API not supported', e);
+    }
+}
+
+function playNotificationSound() {
+    if (!audioEnabled || !audioContext) return;
+    
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    // Pleasant "Ding" for Front of House
+    oscillator.type = 'sine'; // Soft wave
+    oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+    oscillator.frequency.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.5);
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 1.5);
+
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 1.5);
+}
 
 async function loadOrders() {
     if (!window.supabaseClient) {
@@ -251,17 +317,13 @@ function listenForOrderUpdates() {
             // Play sound for ready orders (chef marked as ready)
             if (payload.eventType === 'UPDATE' && payload.new.status === 'ready') {
                 showNotification(`Order for ${payload.new.location_info || `Table ${payload.new.table_number}`} is ready for pickup!`, 'success');
-                if (typeof playNotificationSound === 'function') {
-                    playNotificationSound();
-                }
+                playNotificationSound();
             }
             
             // Play sound for new orders
             if (payload.eventType === 'INSERT') {
                 showNotification(`New order from ${payload.new.location_info || `Table ${payload.new.table_number}`}`, 'info');
-                if (typeof playNotificationSound === 'function') {
-                    playNotificationSound();
-                }
+                playNotificationSound();
             }
 
             setTimeout(() => loadOrders(), 100);

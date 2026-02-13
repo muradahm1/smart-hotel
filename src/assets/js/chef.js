@@ -34,11 +34,11 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         loadChefOrders();
         listenForOrderUpdates();
-        // Fallback polling every 5 seconds
+        // Fallback polling every 30 seconds (optimized for data usage)
         setInterval(() => {
             console.log('🔄 Polling for updates...');
             loadChefOrders();
-        }, 5000);
+        }, 30000);
     }, 500);
 });
 
@@ -51,6 +51,34 @@ function initAudio() {
     } catch (e) {
         console.error('Web Audio API not supported', e);
     }
+}
+
+function playNotificationSound() {
+    if (!audioEnabled || !audioContext) return;
+    
+    // Resume context if suspended (browser policy)
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    // Urgent "Double Beep" for Kitchen
+    oscillator.type = 'square'; // Sharper sound to cut through kitchen noise
+    oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // High pitch
+    oscillator.frequency.setValueAtTime(0, audioContext.currentTime + 0.1); // Silence
+    oscillator.frequency.setValueAtTime(880, audioContext.currentTime + 0.15); // Second beep
+    
+    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.3);
+    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.35);
+
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.4);
 }
 
 async function loadChefOrders() {
@@ -247,6 +275,7 @@ function listenForOrderUpdates() {
             if (payload.eventType === 'INSERT' && payload.new.status === 'pending') {
                 console.log('🆕 New order detected!');
                 showNotification(`New order from ${payload.new.location_info || `Table ${payload.new.table_number}`}`, 'info');
+                playNotificationSound();
             }
             
             // Always reload orders on any change

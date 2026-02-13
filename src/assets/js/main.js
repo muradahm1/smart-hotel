@@ -73,6 +73,75 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.feature').forEach(el => {
         observer.observe(el);
     });
+
+    // Chat Widget Toggle Logic
+    const chatToggleBtn = document.getElementById('chatToggleBtn');
+    const chatCloseBtn = document.getElementById('chatCloseBtn');
+    const chatWindow = document.getElementById('chatWindow');
+    const chatInput = document.querySelector('.chat-input-area input');
+    const chatSendBtn = document.querySelector('.chat-input-area button');
+    const chatBody = document.querySelector('.chat-body');
+
+    if (chatToggleBtn && chatWindow) {
+        chatToggleBtn.addEventListener('click', () => {
+            chatWindow.classList.toggle('active');
+            if (chatWindow.classList.contains('active') && chatInput) {
+                setTimeout(() => chatInput.focus(), 300);
+            }
+        });
+
+        if (chatCloseBtn) {
+            chatCloseBtn.addEventListener('click', () => {
+                chatWindow.classList.remove('active');
+            });
+        }
+
+        // Send Message Logic
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            if (message) {
+                // Add User Message
+                addMessage(message, 'user');
+                chatInput.value = '';
+
+                // Simulate Bot Response (Simple Logic)
+                setTimeout(() => {
+                    let botResponse = "Thank you for your message. A staff member will be with you shortly.";
+                    
+                    const lowerMsg = message.toLowerCase();
+                    if (lowerMsg.includes('menu') || lowerMsg.includes('food')) {
+                        botResponse = "You can view our full menu by clicking the 'Menu' link in the navigation bar.";
+                    } else if (lowerMsg.includes('book') || lowerMsg.includes('reservation') || lowerMsg.includes('table')) {
+                        botResponse = "To book a table, please call us at +251 906317474 or use the reservation form.";
+                    } else if (lowerMsg.includes('open') || lowerMsg.includes('hour') || lowerMsg.includes('time')) {
+                        botResponse = "We are open Mon-Thu 5PM-10PM and Fri-Sun 5PM-11PM.";
+                    }
+
+                    addMessage(botResponse, 'bot');
+                }, 1000);
+            }
+        }
+
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('chat-message', sender);
+            messageDiv.innerHTML = `<p>${text}</p>`;
+            chatBody.appendChild(messageDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        if (chatSendBtn) {
+            chatSendBtn.addEventListener('click', sendMessage);
+        }
+
+        if (chatInput) {
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        }
+    }
 });
 
 // Secure cart management functions
@@ -141,4 +210,3 @@ function formatCurrency(amount) {
         currency: 'USD'
     }).format(amount);
 }
-

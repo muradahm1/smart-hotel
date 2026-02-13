@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth + Shifts Test | RAMZ</title>
+    <link rel="stylesheet" href="/src/assets/css/style.css">
+    <style>
+        body { background: #0a0a0a; color: #fff; padding: 2rem; font-family: Inter, sans-serif; }
+        .test-container { max-width: 800px; margin: 0 auto; }
+        .test-section { background: #1a1a1a; padding: 2rem; margin: 1rem 0; border-radius: 12px; border: 1px solid #333; }
+        .test-section h2 { color: #c9b48c; margin-bottom: 1rem; }
+        .status { padding: 0.5rem 1rem; border-radius: 8px; margin: 0.5rem 0; }
+        .status.success { background: #51cf66; color: #000; }
+        .status.error { background: #ff6b6b; color: #fff; }
+        .status.info { background: #339af0; color: #fff; }
+        button { padding: 10px 20px; margin: 5px; background: #c9b48c; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        button:hover { background: #d4c29a; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .log { background: #0a0a0a; padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 0.9rem; max-height: 300px; overflow-y: auto; }
+        .log-entry { padding: 5px; border-bottom: 1px solid #222; }
+        input { padding: 10px; margin: 5px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 8px; width: 100%; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 style="color: #c9b48c;">🔐 Authentication + Shifts Integration Test</h1>
+        
+        <!-- Current Status -->
+        <div class="test-section">
+            <h2>Current Status</h2>
+            <div id="currentStatus" class="status info">Checking...</div>
+            <div id="userInfo"></div>
+            <div id="shiftInfo"></div>
+        </div>
+
+        <!-- Test Login -->
+        <div class="test-section">
+            <h2>1. Test Login (Cashier)</h2>
+            <p>Login as cashier - should prompt for opening cash and start shift</p>
+            <input type="email" id="testEmail" placeholder="Email" value="cashier@ramz.com">
+            <input type="password" id="testPassword" placeholder="Password" value="Cashier123">
+            <button onclick="testLogin()">Login as Cashier</button>
+            <button onclick="testLoginAdmin()">Login as Admin (No Shift)</button>
+        </div>
+
+        <!-- Test Shift Operations -->
+        <div class="test-section">
+            <h2>2. Test Shift Operations</h2>
+            <button onclick="checkActiveShift()">Check Active Shift</button>
+            <button onclick="viewShiftDetails()">View Shift Details</button>
+            <button onclick="simulateTransaction()">Simulate Transaction</button>
+        </div>
+
+        <!-- Test Logout -->
+        <div class="test-section">
+            <h2>3. Test Logout</h2>
+            <p>Logout - should prompt for closing cash and calculate variance</p>
+            <button onclick="testLogout()">Logout (Close Shift)</button>
+        </div>
+
+        <!-- Activity Log -->
+        <div class="test-section">
+            <h2>Activity Log</h2>
+            <button onclick="clearLog()">Clear Log</button>
+            <div class="log" id="activityLog"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/src/assets/js/config-public.js"></script>
+    <script src="/src/assets/js/supabase.js"></script>
+    <script src="/src/assets/js/auth.js"></script>
+
+    <script>
+        function log(msg, type = 'info') {
+            const logDiv = document.getElementById('activityLog');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            const colors = { success: '#51cf66', error: '#ff6b6b', info: '#339af0', warning: '#ffa94d' };
+            entry.style.color = colors[type] || '#fff';
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            logDiv.insertBefore(entry, logDiv.firstChild);
+        }
+
+        function clearLog() {
+            document.getElementById('activityLog').innerHTML = '';
+        }
+
+        async function updateStatus() {
+            try {
+                const user = await getCurrentUser();
+                const statusDiv = document.getElementById('currentStatus');
+                const userInfoDiv = document.getElementById('userInfo');
+                const shiftInfoDiv = document.getElementById('shiftInfo');
+
+                if (user) {
+                    statusDiv.className = 'status success';
+                    statusDiv.textContent = '✅ Authenticated';
+                    userInfoDiv.innerHTML = `<p><strong>User:</strong> ${user.email}</p><p><strong>Role:</strong> ${user.role}</p>`;
+                    
+                    const shiftId = localStorage.getItem('current_shift_id');
+                    if (shiftId) {
+                        shiftInfoDiv.innerHTML = `<p><strong>Active Shift:</strong> ${shiftId}</p>`;
+                    } else {
+                        shiftInfoDiv.innerHTML = '<p><strong>Shift:</strong> None</p>';
+                    }
+                    
+                    log('Status updated: Authenticated as ' + user.role, 'success');
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.textContent = '❌ Not Authenticated';
+                    userInfoDiv.innerHTML = '';
+                    shiftInfoDiv.innerHTML = '';
+                    log('Status updated: Not authenticated', 'info');
+                }
+            } catch (error) {
+                log('Error updating status: ' + error.message, 'error');
+            }
+        }
+
+        async function testLogin() {
+            const email = document.getElementById('testEmail').value;
+            const password = document.getElementById('testPassword').value;
+
+            try {
+                log('Attempting login as cashier...', 'info');
+                await login(email, password);
+                log('Login successful! Shift should have started.', 'success');
+                await updateStatus();
+            } catch (error) {
+                log('Login failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testLoginAdmin() {
+            try {
+                log('Attempting login as admin (no shift tracking)...', 'info');
+                await login('admin@ramz.com', 'Admin123');
+                log('Admin login successful! No shift started.', 'success');
+                await updateStatus();
+            } catch (error) {
+                log('Login failed: ' + error.message, 'error');
+            }
+        }
+
+        async function checkActiveShift() {
+            try {
+                const user = await getCurrentUser();
+                if (!user) {
+                    log('Not authenticated', 'error');
+                    return;
+                }
+
+                const { data, error } = await supabase.rpc('get_active_shift', {
+                    p_user_id: user.id
+                });
+
+                if (error) throw error;
+
+                if (data) {
+                    log('Active shift found: ' + JSON.stringify(data), 'success');
+                } else {
+                    log('No active shift', 'info');
+                }
+            } catch (error) {
+                log('Error checking shift: ' + error.message, 'error');
+            }
+        }
+
+        async function viewShiftDetails() {
+            const shiftId = localStorage.getItem('current_shift_id');
+            if (!shiftId) {
+                log('No active shift', 'error');
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('shifts')
+                    .select('*')
+                    .eq('id', shiftId)
+                    .single();
+
+                if (error) throw error;
+
+                log('Shift Details:', 'info');
+                log(`  Opening Cash: $${data.opening_cash}`, 'info');
+                log(`  Total Orders: ${data.total_orders || 0}`, 'info');
+                log(`  Total Sales: $${data.total_sales || 0}`, 'info');
+                log(`  Cash Sales: $${data.cash_sales || 0}`, 'info');
+            } catch (error) {
+                log('Error viewing shift: ' + error.message, 'error');
+            }
+        }
+
+        async function simulateTransaction() {
+            const shiftId = localStorage.getItem('current_shift_id');
+            if (!shiftId) {
+                log('No active shift - start one first', 'error');
+                return;
+            }
+
+            try {
+                const amount = 25.50;
+                const { error } = await supabase.from('transactions').insert([{
+                    order_id: crypto.randomUUID(),
+                    payment_method: 'cash',
+                    amount: amount,
+                    cashier: 'Test Cashier',
+                    shift_id: shiftId
+                }]);
+
+                if (error) throw error;
+
+                log(`Transaction added: $${amount} (cash)`, 'success');
+                setTimeout(viewShiftDetails, 1000);
+            } catch (error) {
+                log('Transaction failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testLogout() {
+            try {
+                log('Attempting logout (will prompt for closing cash)...', 'info');
+                await logout();
+            } catch (error) {
+                log('Logout failed: ' + error.message, 'error');
+            }
+        }
+
+        // Initialize
+        window.addEventListener('load', () => {
+            updateStatus();
+            log('Test page loaded', 'success');
+        });
+    </script>
+</body>
+</html>
