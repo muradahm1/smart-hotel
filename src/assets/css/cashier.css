@@ -754,49 +754,61 @@
 /* Mobile Responsive */
 @media (max-width: 768px) {
     .quick-search {
-        position: relative;
+        position: sticky;
         top: 0;
         left: 0;
         transform: none;
-        margin: 10px;
+        margin: 0;
         width: calc(100% - 20px);
-        padding: 10px;
+        width: 100%;
+        padding: 15px;
         flex-direction: row;
+        border-radius: 0;
+        border-bottom: 1px solid var(--border-light);
     }
 
     .quick-search input {
         width: 100%;
-        font-size: 14px;
+        font-size: 15px;
+        padding: 10px;
     }
 
     .sales-summary {
         position: relative;
         top: 0;
         right: 0;
-        margin: 0 10px 10px;
+        margin: 10px;
         width: calc(100% - 20px);
         justify-content: space-around;
         padding: 10px;
-        z-index: 999;
+        z-index: 10;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    .sales-item {
+        border-right: 1px solid var(--border-light);
+    }
+    .sales-item:last-child {
+        border-right: none;
     }
 
     .cashier-layout {
         flex-direction: column;
-        padding-top: 10px;
+        padding-top: 0;
         height: auto;
     }
     
     .orders-panel {
         width: 100%;
-        height: auto;
-        max-height: 350px;
+        max-height: 40vh;
         border-right: none;
         border-bottom: 2px solid var(--accent-gold);
     }
     
     .order-details-panel {
         width: 100%;
-        height: auto;
         min-height: 300px;
         border-right: none;
         border-bottom: 2px solid var(--accent-gold);
@@ -804,24 +816,29 @@
     
     .payment-panel {
         width: 100%;
-        height: auto;
         border-left: none;
-        padding-bottom: 80px; /* Space for quick actions */
+        padding-bottom: 100px;
     }
     
     .payment-methods-simple {
-        flex-direction: row;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
     }
 
     .payment-btn-simple {
-        flex: 1;
-        min-width: 100px;
-        font-size: 0.9rem;
+        width: 100%;
+        padding: 15px 10px;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
     }
     
     .payment-actions-simple {
         flex-direction: column;
+        gap: 15px;
     }
 
     /* Manual Order Modal Fixes */
@@ -836,12 +853,28 @@
 
     .menu-items-panel, .order-builder-panel {
         width: 100%;
-        height: 50%;
+        height: 50vh;
         border-right: none;
-        border-bottom: 2px solid var(--border-light);
+    }
+
+    .menu-items-panel {
+        border-bottom: 2px solid var(--accent-gold);
     }
 
     .menu-items-list {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        padding: 5px;
+    }
+
+    .quick-actions {
+        width: 100%;
+        bottom: 0;
+        right: 0;
+        background: var(--background-dark);
+        padding: 10px;
+        border-top: 1px solid var(--border-light);
+        justify-content: space-around;
+        z-index: 1001;
     }
 }
