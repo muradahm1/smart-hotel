@@ -1,5 +1,4 @@
-// Simple Supabase Configuration
-console.log('Loading Supabase configuration...');
+
 
 // Configuration
 const SUPABASE_URL = 'https://ozhvejzazlvsxojeoxcj.supabase.co';
@@ -13,14 +12,11 @@ function initSupabase() {
         try {
             supabaseInstance = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             window.supabaseClient = supabaseInstance;
-            console.log('✅ Supabase initialized successfully');
             return true;
         } catch (error) {
-            console.error('❌ Supabase initialization failed:', error);
             return false;
         }
     } else {
-        console.warn('⚠️ Supabase library not loaded yet');
         return false;
     }
 }

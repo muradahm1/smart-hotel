@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Initialize admin navigation
 function initializeAdminNavigation() {
-    // Make sure the orders section is shown by default
     showSection('orders');
     
     // Add click event listeners to navigation buttons

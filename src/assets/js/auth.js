@@ -157,6 +157,68 @@ async function endShift(user) {
     }
 }
 
+// --- STAFF & PROFILE MANAGEMENT (PRO FEATURES) ---
+
+/**
+ * Allows the logged-in user to change their own password
+ */
+async function updateOwnPassword(newPassword) {
+    try {
+        if (newPassword.length < 8) throw new Error('Password too short');
+        
+        const { error } = await supabase.auth.updateUser({
+            password: newPassword
+        });
+
+        if (error) throw error;
+        showNotification('Password updated successfully', 'success');
+        return true;
+    } catch (error) {
+        console.error('Password update error:', error);
+        showNotification(error.message, 'error');
+        return false;
+    }
+}
+
+/**
+ * Admin: Fetch all registered staff profiles
+ */
+async function getAllStaffProfiles() {
+    try {
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .order('role', { ascending: true });
+
+        if (error) throw error;
+        return data;
+    } catch (error) {
+        console.error('Error fetching staff:', error);
+        return [];
+    }
+}
+
+/**
+ * Admin: Update a staff member's role or status
+ */
+async function updateStaffMember(userId, updates) {
+    try {
+        // updates = { role: 'chef', is_active: false }
+        const { error } = await supabase
+            .from('profiles')
+            .update(updates)
+            .eq('id', userId);
+
+        if (error) throw error;
+        showNotification('Staff record updated', 'success');
+        return true;
+    } catch (error) {
+        console.error('Update staff error:', error);
+        showNotification('Failed to update staff', 'error');
+        return false;
+    }
+}
+
 function promptForOpeningCash() {
     return new Promise((resolve) => {
         const amount = prompt('Enter opening cash amount in drawer:', '500.00');
@@ -258,9 +320,11 @@ async function login(email, password) {
         await waitForSupabase();
         
         // Rate limiting check
+        // PRO TIP: Use a dedicated constant for the cooldown period
+        const LOGIN_COOLDOWN_MS = 3000;
         const lastLoginAttempt = localStorage.getItem('lastLoginAttempt');
         const now = Date.now();
-        if (lastLoginAttempt && (now - parseInt(lastLoginAttempt)) < 3000) {
+        if (lastLoginAttempt && (now - parseInt(lastLoginAttempt)) < LOGIN_COOLDOWN_MS) {
             throw new Error('Please wait before trying again');
         }
         localStorage.setItem('lastLoginAttempt', now.toString());

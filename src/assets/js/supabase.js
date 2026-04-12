@@ -9,7 +9,6 @@ function initSupabase() {
         
         supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         window.supabaseClient = supabaseClient;
-        console.log('✅ Supabase client initialized');
         return true;
     }
     return false;

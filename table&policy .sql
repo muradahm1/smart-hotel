@@ -264,6 +264,7 @@ CREATE TABLE IF NOT EXISTS profiles (
     id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
     email TEXT,
     role TEXT CHECK (role IN ('admin', 'chef', 'hostess', 'customer')) DEFAULT 'customer',
+    is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -271,12 +272,23 @@ CREATE TABLE IF NOT EXISTS profiles (
 -- Enable RLS
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
--- Create policies
-CREATE POLICY "Users can view own profile" ON profiles
-    FOR SELECT USING (auth.uid() = id);
+-- 1. Users can only see their profile if they are active
+CREATE POLICY "Active users can view own profile" ON profiles
+    FOR SELECT USING (auth.uid() = id AND is_active = true);
 
-CREATE POLICY "Users can update own profile" ON profiles
-    FOR UPDATE USING (auth.uid() = id);
+-- 2. Admins have full control over all profiles
+CREATE POLICY "Admins can view and update all profiles" ON profiles
+    FOR ALL USING (
+        EXISTS (
+            SELECT 1 FROM profiles 
+            WHERE id = auth.uid() AND role = 'admin' AND is_active = true
+        )
+    );
+
+-- 3. Users can only update their own basic info (not role or is_active)
+CREATE POLICY "Users can update own profile limited" ON profiles
+    FOR UPDATE USING (auth.uid() = id AND is_active = true)
+    WITH CHECK (auth.uid() = id);
 
 -- Function to handle new user registration
 CREATE OR REPLACE FUNCTION handle_new_user()
