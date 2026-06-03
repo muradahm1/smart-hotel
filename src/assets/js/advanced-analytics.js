@@ -272,18 +272,18 @@ function renderOrderTypeDistribution(orders) {
 
 function renderOrderSizeAnalysis(orders) {
     const sizeRanges = {
-        'Small ($0-$15)': 0,
-        'Medium ($15-$30)': 0,
-        'Large ($30-$50)': 0,
-        'XL ($50+)': 0
+        'Small (0-15)': 0,
+        'Medium (15-30)': 0,
+        'Large (30-50)': 0,
+        'XL (50+)': 0
     };
     
     orders.forEach(order => {
         const amount = order.total_amount;
-        if (amount <= 15) sizeRanges['Small ($0-$15)']++;
-        else if (amount <= 30) sizeRanges['Medium ($15-$30)']++;
-        else if (amount <= 50) sizeRanges['Large ($30-$50)']++;
-        else sizeRanges['XL ($50+)']++;
+        if (amount <= 15) sizeRanges['Small (0-15)']++;
+        else if (amount <= 30) sizeRanges['Medium (15-30)']++;
+        else if (amount <= 50) sizeRanges['Large (30-50)']++;
+        else sizeRanges['XL (50+)']++;
     });
     
     const ctx = document.getElementById('orderSizeChart');

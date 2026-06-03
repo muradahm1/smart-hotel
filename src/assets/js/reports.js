@@ -146,7 +146,7 @@ function renderSalesOverTimeChart(orders) {
                     beginAtZero: true,
                     ticks: {
                         callback: function(value) {
-                            return '$' + value.toFixed(2);
+                            return value.toFixed(2);
                         }
                     }
                 }
@@ -155,7 +155,7 @@ function renderSalesOverTimeChart(orders) {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return 'Revenue: $' + context.parsed.y.toFixed(2);
+                            return 'Revenue: ' + context.parsed.y.toFixed(2);
                         }
                     }
                 }
@@ -686,18 +686,18 @@ function renderOrderTypeDistribution(orders) {
 
 function renderOrderSizeAnalysis(orders) {
     const sizeRanges = {
-        'Small ($0-$15)': 0,
-        'Medium ($15-$30)': 0,
-        'Large ($30-$50)': 0,
-        'XL ($50+)': 0
+        'Small (0-150)': 0,
+        'Medium (150-300)': 0,
+        'Large (300-500)': 0,
+        'XL (500+)': 0
     };
     
     orders.forEach(order => {
         const amount = order.total_amount;
-        if (amount <= 15) sizeRanges['Small ($0-$15)']++;
-        else if (amount <= 30) sizeRanges['Medium ($15-$30)']++;
-        else if (amount <= 50) sizeRanges['Large ($30-$50)']++;
-        else sizeRanges['XL ($50+)']++;
+        if (amount <= 15) sizeRanges['Small (0-150)']++;
+        else if (amount <= 30) sizeRanges['Medium (150-300)']++;
+        else if (amount <= 50) sizeRanges['Large (300-500)']++;
+        else sizeRanges['XL (50+)']++;
     });
     
     const ctx = document.getElementById('orderSizeChart');

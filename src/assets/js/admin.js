@@ -243,6 +243,13 @@ function renderOrders(orders) {
                         <i class="fas fa-play"></i> Start Preparing
                     </button>
                 ` : ''}
+                <button class="btn btn-outline" onclick="printOrderReceipt('${order.id}')">
+                    <i class="fas fa-print"></i> Print Receipt
+                </button>
+                ${order.status === 'pending' ? `
+                        <i class="fas fa-play"></i> Start Preparing
+                    </button>
+                ` : ''}
                 ${order.status === 'preparing' ? `
                     <button class="btn btn-success" onclick="updateOrderStatus('${order.id}', 'ready')">
                         <i class="fas fa-check"></i> Mark Ready
@@ -759,7 +766,7 @@ async function loadShifts() {
             const start = new Date(shift.start_time).toLocaleString();
             const end = shift.end_time ? new Date(shift.end_time).toLocaleString() : '-';
             const statusColor = shift.status === 'active' ? '#4caf50' : '#9e9e9e';
-            const salesDisplay = typeof formatCurrency === 'function' ? formatCurrency(shift.total_sales || 0) : `$${(shift.total_sales || 0).toFixed(2)}`;
+            const salesDisplay = typeof formatCurrency === 'function' ? formatCurrency(shift.total_sales || 0) : (shift.total_sales || 0).toFixed(2);
             
             return `
                 <tr style="border-bottom: 1px solid #333; transition: background 0.2s;">

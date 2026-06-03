@@ -119,7 +119,7 @@ function renderMenuItems() {
                 <div class="menu-item-category">${item.category}</div>
                 <div class="menu-item-header">
                     <h3>${item.name}</h3>
-                    <span>$${item.price.toFixed(2)}</span>
+                    <span>${item.price.toFixed(2)}</span>
                 </div>
                 <p>${item.description}</p>
                 <button onclick="addToCart('${item.id}')"><i class="fas fa-plus"></i> Add to Order</button>

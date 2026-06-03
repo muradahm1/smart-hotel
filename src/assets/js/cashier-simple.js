@@ -348,7 +348,7 @@ class SimpleCashier {
         
         document.getElementById('totalAmount').textContent = this.formatCurrency(order.total_amount);
         document.getElementById('receivedInput').value = '';
-        document.getElementById('changeDisplay').textContent = '$0.00';
+        document.getElementById('changeDisplay').textContent = '0.00';
         
         document.getElementById('paymentPanel').style.display = 'block';
         
@@ -816,7 +816,7 @@ class SimpleCashier {
         
         if (!this.manualOrderItems || this.manualOrderItems.length === 0) {
             container.innerHTML = '<div class="empty-order">No items added</div>';
-            document.getElementById('manualOrderTotal').textContent = '$0.00';
+            document.getElementById('manualOrderTotal').textContent = '0.00';
             return;
         }
         
@@ -973,10 +973,7 @@ class SimpleCashier {
     }
 
     formatCurrency(amount) {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD'
-        }).format(amount || 0);
+        return (amount || 0).toFixed(2);
     }
 
     formatTime(timestamp) {

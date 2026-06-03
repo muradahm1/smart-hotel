@@ -304,10 +304,7 @@ class ShiftsAuthIntegration {
 
     // Format currency
     formatCurrency(amount) {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD'
-        }).format(amount || 0);
+        return (amount || 0).toFixed(2);
     }
 
     // Cleanup

@@ -95,7 +95,7 @@ async function startShift(user) {
         
         console.log('Shift started:', newShift.id);
         localStorage.setItem('current_shift_id', newShift.id);
-        showNotification(`Shift started with $${openingCash.toFixed(2)} opening cash`, 'success');
+        showNotification(`Shift started with ${openingCash.toFixed(2)} opening cash`, 'success');
         return newShift.id;
     } catch (error) {
         console.error('Error starting shift:', error);
@@ -141,8 +141,8 @@ async function endShift(user) {
         const variance = parseFloat(closedShift.cash_variance || 0);
         if (variance !== 0) {
             const varianceMsg = variance > 0 
-                ? `Cash over by $${Math.abs(variance).toFixed(2)}` 
-                : `Cash short by $${Math.abs(variance).toFixed(2)}`;
+                ? `Cash over by ${Math.abs(variance).toFixed(2)}` 
+                : `Cash short by ${Math.abs(variance).toFixed(2)}`;
             showNotification(varianceMsg, variance > 0 ? 'warning' : 'error');
         } else {
             showNotification('Shift closed - cash balanced perfectly!', 'success');
@@ -238,7 +238,7 @@ function promptForOpeningCash() {
 
 function promptForClosingCash(expectedCash) {
     return new Promise((resolve) => {
-        const message = `Count cash in drawer:\n\nExpected: $${expectedCash.toFixed(2)}\n\nEnter actual amount:`;
+        const message = `Count cash in drawer:\n\nExpected: ${expectedCash.toFixed(2)}\n\nEnter actual amount:`;
         const amount = prompt(message, expectedCash.toFixed(2));
         if (amount === null) {
             if (confirm('You must close your shift before logging out. Cancel logout?')) {

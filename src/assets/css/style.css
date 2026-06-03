@@ -4162,3 +4162,92 @@ table tr:hover {
         height: 60vh;
     }
 }
+
+/* =========================================
+   PROFESSIONAL THERMAL PRINT SYSTEM
+   Target: 80mm (Standard) & 58mm (Small)
+   ========================================= */
+@media print {
+    @page {
+        margin: 0;
+        size: auto;
+    }
+
+    /* Hide everything except the receipt */
+    body * {
+        visibility: hidden;
+        background: none !important;
+    }
+
+    #receipt-print-area, #receipt-print-area * {
+        visibility: visible;
+    }
+
+    #receipt-print-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 80mm; /* Standard Thermal Width */
+        padding: 4mm;
+        background: white !important;
+        color: black !important;
+        font-family: 'Courier New', Courier, monospace; /* Essential for alignment */
+        font-size: 12px;
+        line-height: 1.2;
+    }
+
+    .receipt-header {
+        text-align: center;
+        margin-bottom: 5mm;
+    }
+
+    .receipt-logo {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 2mm;
+        font-family: 'Playfair Display', serif;
+    }
+
+    .receipt-divider {
+        border-top: 1px dashed #000;
+        margin: 3mm 0;
+    }
+
+    .receipt-item-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1mm;
+    }
+
+    .receipt-item-name {
+        flex: 1;
+        padding-right: 2mm;
+    }
+
+    .receipt-item-qty {
+        width: 8mm;
+    }
+
+    .receipt-item-total {
+        width: 20mm;
+        text-align: right;
+    }
+
+    .receipt-summary {
+        margin-top: 4mm;
+    }
+
+    .receipt-summary-row {
+        display: flex;
+        justify-content: space-between;
+        font-weight: bold;
+    }
+
+    .receipt-footer {
+        text-align: center;
+        margin-top: 8mm;
+        font-size: 10px;
+    }
+
+    .qr-placeholder { margin-top: 4mm; text-align: center; }
+}

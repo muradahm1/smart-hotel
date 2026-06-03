@@ -98,7 +98,7 @@ function createMenuItemElement(item) {
             <div class="menu-item-category">${item.category || ''}</div>
             <div class="menu-item-header">
                 <h3 class="menu-item-name">${item.name || ''}</h3>
-                <span class="menu-item-price">$${(item.price || 0).toFixed(2)}</span>
+                <span class="menu-item-price">${(item.price || 0).toFixed(2)}</span>
             </div>
             <p class="menu-item-description">${item.description || ''}</p>
             <button class="add-to-cart" onclick="addToCart('${item.id}')">

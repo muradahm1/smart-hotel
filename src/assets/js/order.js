@@ -556,10 +556,7 @@ function updateCartCount() {
 }
 
 function formatCurrency(amount) {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD'
-    }).format(amount);
+    return (amount || 0).toFixed(2);
 }
 
 function clearTableNumber() {
