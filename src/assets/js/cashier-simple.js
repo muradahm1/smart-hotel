@@ -94,7 +94,7 @@ class SimpleCashier {
                         menu_items (name, price)
                     )
                 `)
-                .eq('status', 'ready')
+                .in('status', ['ready', 'served'])
                 .order('created_at', { ascending: true });
 
             if (error) {
@@ -187,7 +187,7 @@ class SimpleCashier {
                 const { data: readyOrders } = await supabaseClient
                     .from('orders')
                     .select('id')
-                    .eq('status', 'ready');
+                    .in('status', ['ready', 'served']);
 
                 if (transactions) {
                     totalSales = transactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
@@ -233,7 +233,7 @@ class SimpleCashier {
                         menu_items (name, price)
                     )
                 `)
-                .eq('status', 'ready');
+                .in('status', ['ready', 'served']);
 
             if (!isNaN(searchTerm)) {
                 query = query.eq('table_number', parseInt(searchTerm));

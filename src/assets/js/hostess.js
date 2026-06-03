@@ -262,14 +262,14 @@ async function markAsServed(orderId) {
         const { error } = await window.supabaseClient
             .from('orders')
             .update({ 
-                status: 'completed',
+                status: 'served',
                 updated_at: new Date().toISOString()
             })
             .eq('id', orderId);
             
         if (error) throw error;
         
-        showNotification(`Order ${orderId.substring(0, 8)} marked as served.`, 'success');
+        showNotification(`Order ${orderId.substring(0, 8)} marked as served. Awaiting payment.`, 'success');
         loadOrders();
     } catch (error) {
         console.error('Error marking order as served:', error);

@@ -185,15 +185,14 @@ function validateTableNumber(tableNumber) {
 }
 
 function validateCustomerName(name) {
-    if (!name || typeof name !== 'string') return false;
+    if (!name || !name.trim()) return true; // Optional
     const trimmed = name.trim();
-    return trimmed.length >= 2 && 
-           trimmed.length <= 50 && 
-           /^[a-zA-Z\s\u00C0-\u017F\u1E00-\u1EFF]+$/.test(trimmed); // Support international characters
+    return trimmed.length <= 50 && 
+           /^[a-zA-Z\s\u00C0-\u017F\u1E00-\u1EFF]+$/.test(trimmed);
 }
 
 function validatePhoneNumber(phone) {
-    if (!phone || typeof phone !== 'string') return false;
+    if (!phone || !phone.trim()) return true; // Optional
     const cleaned = phone.replace(/[\s\-()]/g, '');
     return /^[+]?[0-9]{10,15}$/.test(cleaned);
 }
@@ -261,11 +260,11 @@ async function placeOrder() {
         alert(translate('alert_invalid_table'));
         return;
     }
-    if (!validateCustomerName(customerName)) {
+    if (customerName.trim() && !validateCustomerName(customerName)) {
         alert(translate('alert_invalid_name'));
         return;
     }
-    if (!validatePhoneNumber(customerPhone)) {
+    if (customerPhone.trim() && !validatePhoneNumber(customerPhone)) {
         alert(translate('alert_invalid_phone'));
         return;
     }
@@ -297,8 +296,8 @@ async function placeOrder() {
     // Sanitize inputs and show confirmation modal
     showOrderConfirmation({
         tableNumber: parseInt(tableNumber),
-        customerName: sanitizeInput(customerName.trim()),
-        customerPhone: sanitizeInput(customerPhone.trim()),
+        customerName: sanitizeInput(customerName.trim()) || 'Guest',
+        customerPhone: sanitizeInput(customerPhone.trim()) || '',
         orderNotes: sanitizeInput(orderNotes.trim()),
         cart,
         total,
