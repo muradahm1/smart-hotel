@@ -79,8 +79,9 @@ class SimpleCashier {
             
             if (!window.supabaseClient || !navigator.onLine) {
                 console.log('Offline - loading from cache');
-                const cachedOrders = await this.offlineCache.getCachedOrders('ready');
-                this.renderOrders(cachedOrders);
+                const cachedReady = await this.offlineCache.getCachedOrders('ready');
+                const cachedServed = await this.offlineCache.getCachedOrders('served');
+                this.renderOrders([...cachedReady, ...cachedServed]);
                 this.updateStats();
                 return;
             }
@@ -99,8 +100,9 @@ class SimpleCashier {
 
             if (error) {
                 console.error('Database error:', error);
-                const cachedOrders = await this.offlineCache.getCachedOrders('ready');
-                this.renderOrders(cachedOrders);
+                const cachedReady = await this.offlineCache.getCachedOrders('ready');
+                const cachedServed = await this.offlineCache.getCachedOrders('served');
+                this.renderOrders([...cachedReady, ...cachedServed]);
                 return;
             }
 
@@ -118,8 +120,9 @@ class SimpleCashier {
             
         } catch (error) {
             console.error('Failed to load orders:', error);
-            const cachedOrders = await this.offlineCache.getCachedOrders('ready');
-            this.renderOrders(cachedOrders);
+            const cachedReady = await this.offlineCache.getCachedOrders('ready');
+            const cachedServed = await this.offlineCache.getCachedOrders('served');
+            this.renderOrders([...cachedReady, ...cachedServed]);
         }
     }
     
@@ -1070,16 +1073,16 @@ class SimpleCashier {
     
     handleOrderChange(payload) {
         const { eventType, new: newRecord, old: oldRecord } = payload;
-        
-        if (eventType === 'INSERT' && newRecord.status === 'ready') {
-            this.showNotification(`New order ready: Table ${newRecord.table_number}`, 'info');
-            this.loadOrders();
-        } else if (eventType === 'UPDATE') {
+
+        if (eventType === 'UPDATE') {
             if (newRecord.status === 'ready' && oldRecord.status !== 'ready') {
                 this.showNotification(`Order ready: Table ${newRecord.table_number}`, 'info');
+            } else if (newRecord.status === 'served' && oldRecord.status !== 'served') {
+                this.showNotification(`Order served - awaiting payment: Table ${newRecord.table_number}`, 'info');
             }
-            this.loadOrders();
         }
+        // Always reload on any change
+        this.loadOrders();
     }
 }
 
