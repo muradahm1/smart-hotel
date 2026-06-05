@@ -126,26 +126,10 @@ class SimpleCashier {
         }
     }
     
-    showTestOrders() {
-        const testOrders = [
-            {
-                id: 'test-1',
-                table_number: 5,
-                customer_name: 'John Doe',
-                total_amount: 25.50,
-                created_at: new Date().toISOString(),
-                order_items: [
-                    { quantity: 2, menu_items: { name: 'Burger' }, price: 10.00 },
-                    { quantity: 1, menu_items: { name: 'Fries' }, price: 5.50 }
-                ]
-            }
-        ];
-        this.renderOrders(testOrders);
-    }
 
     renderOrders(orders) {
         const container = document.getElementById('ordersList');
-        
+
         if (orders.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
@@ -159,7 +143,9 @@ class SimpleCashier {
         container.innerHTML = orders.map(order => {
             const orderAge = this.getOrderAge(order.created_at);
             const statusClass = orderAge > 15 ? 'urgent' : orderAge > 10 ? 'waiting' : 'new';
-            
+            const isServed = order.status === 'served';
+            const servedBadge = isServed ? `<div style="font-size:0.75rem;color:#51cf66;font-weight:600;">✓ SERVED</div>` : '';
+
             return `
                 <div class="order-item ${statusClass}" onclick="simpleCashier.selectOrder('${order.id}', event)">
                     <div class="order-item-header">
@@ -168,6 +154,7 @@ class SimpleCashier {
                     </div>
                     <div class="order-customer">${order.customer_name || 'Walk-in'}</div>
                     <div class="order-time">${this.formatTime(order.created_at)} (${orderAge}m)</div>
+                    ${servedBadge}
                 </div>
             `;
         }).join('');
@@ -303,6 +290,7 @@ class SimpleCashier {
     
     showOrderDetails(order) {
         const panel = document.getElementById('orderDetailsPanel');
+        const isServed = order.status === 'served';
         panel.innerHTML = `
             <div class="order-details-content active">
                 <div class="order-header-details">
@@ -316,11 +304,15 @@ class SimpleCashier {
                         <span class="value">${this.formatTime(order.created_at)}</span>
                     </div>
                     <div class="order-info-row">
+                        <span class="label">Status:</span>
+                        <span class="value" style="color:${isServed ? '#51cf66' : '#ffd43b'};font-weight:600;">${isServed ? '✓ Served - Awaiting Payment' : 'Ready'}</span>
+                    </div>
+                    <div class="order-info-row">
                         <span class="label">Total:</span>
                         <span class="value">${this.formatCurrency(order.total_amount)}</span>
                     </div>
                 </div>
-                
+
                 <div class="order-items-details">
                     <h3>Order Items</h3>
                     ${order.order_items.map(item => `
@@ -331,10 +323,10 @@ class SimpleCashier {
                         </div>
                     `).join('')}
                 </div>
-                
+
                 <div class="order-actions">
-                    <button class="btn btn-secondary" onclick="simpleCashier.printOrderReceipt('${order.id}')">
-                        <i class="fas fa-print"></i> Print Receipt
+                    <button class="btn btn-primary" onclick="simpleCashier.printAndCloseOrder('${order.id}')">
+                        <i class="fas fa-print"></i> Print Receipt & Close
                     </button>
                 </div>
             </div>
@@ -617,20 +609,11 @@ class SimpleCashier {
         try {
             const { data: order } = await supabaseClient
                 .from('orders')
-                .select(`
-                    *,
-                    order_items (
-                        *,
-                        menu_items (name, price)
-                    )
-                `)
+                .select(`*, order_items (*, menu_items (name, price))`)
                 .eq('id', orderId)
                 .single();
 
-            if (!order) {
-                this.showNotification('Order not found', 'error');
-                return;
-            }
+            if (!order) { this.showNotification('Order not found', 'error'); return; }
 
             const mockTransaction = {
                 payment_method: 'manual_print',
@@ -638,13 +621,48 @@ class SimpleCashier {
                 change_amount: 0,
                 created_at: new Date().toISOString()
             };
-
             this.printReceipt(order, mockTransaction);
             this.showNotification('Receipt printed!', 'success');
-            
         } catch (error) {
             console.error('Failed to print receipt:', error);
             this.showNotification('Failed to print receipt', 'error');
+        }
+    }
+
+    async printAndCloseOrder(orderId) {
+        try {
+            const { data: order } = await supabaseClient
+                .from('orders')
+                .select(`*, order_items (*, menu_items (name, price))`)
+                .eq('id', orderId)
+                .single();
+
+            if (!order) { this.showNotification('Order not found', 'error'); return; }
+
+            // Print the receipt
+            const transaction = {
+                payment_method: this.selectedPaymentMethod || 'cash',
+                amount: order.total_amount,
+                change_amount: 0,
+                created_at: new Date().toISOString()
+            };
+            this.printReceipt(order, transaction);
+
+            // Mark order as completed so it drops off both cashier and hostess
+            const { error } = await supabaseClient
+                .from('orders')
+                .update({ status: 'completed', updated_at: new Date().toISOString() })
+                .eq('id', orderId);
+
+            if (error) throw error;
+
+            this.showNotification('Receipt printed & order closed!', 'success');
+            this.closeModal();
+            this.loadOrders();
+            this.updateStats();
+        } catch (error) {
+            console.error('Failed to print and close order:', error);
+            this.showNotification('Failed to close order', 'error');
         }
     }
     
