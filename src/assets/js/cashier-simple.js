@@ -1060,12 +1060,14 @@ class SimpleCashier {
             this.startPolling();
             return;
         }
-        
+
+        // Debounce timer to avoid rapid consecutive reloads
+        this._reloadTimer = null;
+
         try {
-            // Subscribe to orders table changes
-            const ordersSubscription = supabaseClient
+            supabaseClient
                 .channel('orders-changes')
-                .on('postgres_changes', 
+                .on('postgres_changes',
                     { event: '*', schema: 'public', table: 'orders' },
                     (payload) => {
                         console.log('Order change detected:', payload);
@@ -1073,34 +1075,44 @@ class SimpleCashier {
                     }
                 )
                 .subscribe();
-                
+
             console.log('✅ Real-time subscriptions active');
         } catch (error) {
             console.warn('Real-time setup failed, using polling:', error);
             this.startPolling();
         }
     }
-    
+
     startPolling() {
-        // Fallback: poll every 30 seconds
-        setInterval(() => {
-            this.loadOrders();
-        }, 30000);
+        setInterval(() => this.loadOrders(), 30000);
         console.log('📡 Polling mode active (30s intervals)');
     }
-    
+
     handleOrderChange(payload) {
         const { eventType, new: newRecord, old: oldRecord } = payload;
 
+        // Show notifications
         if (eventType === 'UPDATE') {
             if (newRecord.status === 'ready' && oldRecord.status !== 'ready') {
                 this.showNotification(`Order ready: Table ${newRecord.table_number}`, 'info');
-            } else if (newRecord.status === 'served' && oldRecord.status !== 'served') {
+            } else if (newRecord.status === 'served') {
                 this.showNotification(`Order served - awaiting payment: Table ${newRecord.table_number}`, 'info');
             }
         }
-        // Always reload on any change
-        this.loadOrders();
+
+        // If order became 'completed', remove it from local display immediately
+        // without waiting for a reload (avoids flicker)
+        if (eventType === 'UPDATE' && newRecord.status === 'completed') {
+            const container = document.getElementById('ordersList');
+            const el = container?.querySelector(`[onclick*="'${newRecord.id}'"]`);
+            if (el) el.closest('.order-item')?.remove();
+        }
+
+        // Debounce reloads — wait 600ms after last event before reloading
+        // This prevents rapid-fire reloads from Supabase real-time that
+        // cause the 'served' order to flicker and disappear
+        clearTimeout(this._reloadTimer);
+        this._reloadTimer = setTimeout(() => this.loadOrders(), 600);
     }
 }
 

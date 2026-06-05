@@ -164,10 +164,12 @@ class OfflineOrderCache {
         for (const transaction of pending) {
             try {
                 if (navigator.onLine && window.supabaseClient) {
-                    // Attempt to sync with server
+                    // Strip IndexedDB-only fields before sending to Supabase
+                    const { id, timestamp, synced: _, cached, ...supabaseData } = transaction;
+                    
                     const { error } = await supabaseClient
                         .from('transactions')
-                        .insert([transaction]);
+                        .insert([supabaseData]);
                     
                     if (!error) {
                         await this.removePendingTransaction(transaction.id);
