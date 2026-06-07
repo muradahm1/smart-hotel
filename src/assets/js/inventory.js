@@ -166,12 +166,6 @@ async function getSession() {
 async function saveIngredient(e) {
     e.preventDefault();
 
-    const session = await getSession();
-    if (!session) {
-        showNotification('You must be logged in to add ingredients', 'error');
-        return;
-    }
-
     const data = {
         name: document.getElementById('ingName').value.trim(),
         category: document.getElementById('ingCategory').value.trim(),
@@ -196,12 +190,6 @@ async function saveIngredient(e) {
 
 async function deleteIngredient(id) {
     if (!confirm('Delete this ingredient?')) return;
-
-    const session = await getSession();
-    if (!session) {
-        showNotification('You must be logged in to delete ingredients', 'error');
-        return;
-    }
 
     try {
         const { error } = await window.supabaseClient.from('ingredients').delete().eq('id', id);
@@ -239,12 +227,6 @@ window.closeStockModal = function () {
 };
 
 window.submitStockModal = async function () {
-    const session = await getSession();
-    if (!session) {
-        showNotification('You must be logged in to update stock', 'error');
-        return;
-    }
-
     const ingId = document.getElementById('stockModalIngId').value;
     const type = document.getElementById('stockModalType').value;
     const qty = parseFloat(document.getElementById('stockModalQty').value);
@@ -327,9 +309,6 @@ window.closeEditIngModal = function () {
 };
 
 window.submitEditIngModal = async function () {
-    const session = await getSession();
-    if (!session) { showNotification('You must be logged in', 'error'); return; }
-
     const id   = document.getElementById('editIngId').value;
     const name = document.getElementById('editIngName').value.trim();
     const cost = parseFloat(document.getElementById('editIngCost').value);
