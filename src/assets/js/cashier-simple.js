@@ -864,34 +864,20 @@ class SimpleCashier {
     }
     
     addToManualOrder(id, name, price) {
-        console.log('Adding to manual order:', { id, name, price });
-        
-        // Ensure manualOrderItems is initialized
-        if (!this.manualOrderItems) {
-            this.manualOrderItems = [];
-        }
-        
-        // Convert id to number for consistent comparison
-        const itemId = parseInt(id);
+        if (!this.manualOrderItems) this.manualOrderItems = [];
+
+        // Keep id as-is (UUID string from DB, or number from fallback list)
+        const itemId    = id;
         const itemPrice = parseFloat(price);
         
-        const existingItem = this.manualOrderItems.find(item => parseInt(item.id) === itemId);
+        const existingItem = this.manualOrderItems.find(item => item.id === itemId);
         
         if (existingItem) {
             existingItem.quantity += 1;
-            console.log('Updated existing item:', existingItem);
         } else {
-            const newItem = { 
-                id: itemId, 
-                name: name, 
-                price: itemPrice, 
-                quantity: 1 
-            };
-            this.manualOrderItems.push(newItem);
-            console.log('Added new item:', newItem);
+            this.manualOrderItems.push({ id: itemId, name, price: itemPrice, quantity: 1 });
         }
         
-        console.log('Current manual order items:', this.manualOrderItems);
         this.updateManualOrderDisplay();
     }
     
@@ -917,9 +903,9 @@ class SimpleCashier {
                     <div class="item-price">${this.formatCurrency(item.price)} each</div>
                 </div>
                 <div class="order-item-controls">
-                    <button class="qty-btn" onclick="simpleCashier.changeQuantity(${item.id}, -1)">-</button>
+                    <button class="qty-btn" onclick="simpleCashier.changeQuantity('${item.id}', -1)">-</button>
                     <span class="quantity">${item.quantity}</span>
-                    <button class="qty-btn" onclick="simpleCashier.changeQuantity(${item.id}, 1)">+</button>
+                    <button class="qty-btn" onclick="simpleCashier.changeQuantity('${item.id}', 1)">+</button>
                     <span class="item-total">${this.formatCurrency(item.price * item.quantity)}</span>
                 </div>
             </div>
@@ -932,14 +918,13 @@ class SimpleCashier {
     }
     
     changeQuantity(id, change) {
-        const itemId = parseInt(id);
-        const item = this.manualOrderItems.find(item => parseInt(item.id) === itemId);
+        const item = this.manualOrderItems.find(item => String(item.id) === String(id));
         if (!item) return;
         
         item.quantity += change;
         
         if (item.quantity <= 0) {
-            this.manualOrderItems = this.manualOrderItems.filter(i => parseInt(i.id) !== itemId);
+            this.manualOrderItems = this.manualOrderItems.filter(i => String(i.id) !== String(id));
         }
         
         this.updateManualOrderDisplay();
