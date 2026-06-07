@@ -1,7 +1,27 @@
 // Inventory Management - RAMZ Hotel
 
+// Realtime subscription handle
+let _inventoryChannel = null;
+
 async function loadInventoryDashboard() {
     await Promise.all([loadIngredients(), loadLowStockAlerts()]);
+    setupInventoryRealtime();
+}
+
+function setupInventoryRealtime() {
+    if (!window.supabaseClient || _inventoryChannel) return;
+
+    _inventoryChannel = window.supabaseClient
+        .channel('inventory-changes')
+        .on('postgres_changes',
+            { event: '*', schema: 'public', table: 'ingredients' },
+            () => loadInventoryDashboard()
+        )
+        .on('postgres_changes',
+            { event: 'INSERT', schema: 'public', table: 'stock_movements' },
+            () => loadInventoryDashboard()
+        )
+        .subscribe();
 }
 
 // ── Ingredients ──────────────────────────────────────────────
