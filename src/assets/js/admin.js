@@ -60,7 +60,7 @@ function setupEventListeners() {
 // Admin Navigation Functions
 function showSection(sectionName) {
     // Hide all sections
-    const sections = ['ordersSection', 'analyticsSection', 'advancedSection', 'menuSection', 'shiftsSection', 'inventorySection'];
+    const sections = ['ordersSection', 'analyticsSection', 'advancedSection', 'menuSection', 'shiftsSection', 'inventorySection', 'profitReportSection'];
     sections.forEach(section => {
         const element = document.getElementById(section);
         if (element) {
@@ -130,7 +130,13 @@ function showSection(sectionName) {
             invBtn.classList.add('active');
         }
         loadInventoryDashboard();
-    } else if (sectionName === 'shifts') {
+    } else if (sectionName === 'profitReport') {
+        const section = document.getElementById('profitReportSection');
+        if (section) section.style.display = 'block';
+        const btn = document.querySelector('[onclick="showSection(\'profitReport\')"]');
+        if (btn) btn.classList.add('active');
+        if (window.ProfitReport) ProfitReport.load();
+    }
         let shiftsSection = document.getElementById('shiftsSection');
         if (!shiftsSection) {
             createShiftsSection();

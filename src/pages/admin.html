@@ -48,6 +48,7 @@
                 <button class="nav-btn" onclick="showSection('advanced')">Advanced Analytics</button>
                 <button class="nav-btn" onclick="showSection('menu')">Menu Management</button>
                 <button class="nav-btn" onclick="showSection('inventory')">Inventory</button>
+                <button class="nav-btn" onclick="showSection('profitReport')"><i class="fas fa-file-invoice-dollar"></i> P&L Report</button>
             </div>
             
             <!-- Orders Section -->
@@ -511,6 +512,155 @@
             </div>
         </div>
 
+    <!-- ── P&L Report Section ─────────────────────────────── -->
+    <div id="profitReportSection" class="admin-section-content" style="display:none;">
+
+        <!-- Header -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+            <h1 style="color:var(--accent-gold)"><i class="fas fa-file-invoice-dollar"></i> Sales, Cost & Profit Report</h1>
+            <button class="btn btn-primary" onclick="ProfitReport.exportPDF()">
+                <i class="fas fa-download"></i> Download PDF
+            </button>
+        </div>
+
+        <!-- Filters -->
+        <div style="background:var(--background-light);border:1px solid var(--border-light);border-radius:12px;padding:1.2rem 1.5rem;margin-bottom:1.5rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
+            <label style="color:var(--text-secondary);font-size:0.9rem">Period:</label>
+            <select id="pr_period" onchange="ProfitReport.onPeriodChange()" style="background:var(--background-dark);border:1px solid var(--border-light);border-radius:8px;color:var(--text-primary);padding:8px 12px">
+                <option value="today">Today</option>
+                <option value="week" selected>This Week</option>
+                <option value="month">This Month</option>
+                <option value="custom">Custom Range</option>
+            </select>
+            <div id="pr_customRange" style="display:none;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+                <input type="date" id="pr_from" style="background:var(--background-dark);border:1px solid var(--border-light);border-radius:8px;color:var(--text-primary);padding:8px 12px">
+                <span style="color:var(--text-secondary)">→</span>
+                <input type="date" id="pr_to"   style="background:var(--background-dark);border:1px solid var(--border-light);border-radius:8px;color:var(--text-primary);padding:8px 12px">
+                <button class="btn btn-secondary" style="padding:8px 16px" onclick="ProfitReport.load()">Apply</button>
+            </div>
+        </div>
+
+        <!-- KPI Cards Row 1: Sales -->
+        <div style="margin-bottom:0.5rem;color:var(--text-secondary);font-size:0.8rem;text-transform:uppercase;letter-spacing:1px">Sales Summary</div>
+        <div class="pr-kpi-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem;">
+            <div class="pr-kpi-card" style="background:var(--background-light);border:1px solid var(--accent-gold);border-radius:12px;padding:1.5rem;">
+                <div style="color:var(--text-secondary);font-size:0.8rem;text-transform:uppercase;letter-spacing:0.5px">Total Revenue</div>
+                <div id="pr_revenue" class="pr-kpi-value" style="font-size:2rem;font-weight:700;color:var(--accent-gold);margin:0.3rem 0">—</div>
+                <div style="font-size:0.8rem;color:var(--text-secondary)">vs prev period: <span id="pr_revChange" style="font-weight:600">—</span></div>
+            </div>
+            <div class="pr-kpi-card" style="background:var(--background-light);border:1px solid var(--border-light);border-radius:12px;padding:1.5rem;">
+                <div style="color:var(--text-secondary);font-size:0.8rem;text-transform:uppercase;letter-spacing:0.5px">Total Orders</div>
+                <div id="pr_orders" class="pr-kpi-value" style="font-size:2rem;font-weight:700;color:var(--text-primary);margin:0.3rem 0">—</div>
+                <div style="font-size:0.8rem;color:var(--text-secondary)">vs prev: <span id="pr_ordersChange" style="font-weight:600">—</span></div>
+            </div>
+            <div class="pr-kpi-card" style="background:var(--background-light);border:1px solid var(--border-light);border-radius:12px;padding:1.5rem;">
+                <div style="color:var(--text-secondary);font-size:0.8rem;text-transform:uppercase;letter-spacing:0.5px">Avg Order Value</div>
+                <div id="pr_avgOrder" class="pr-kpi-value" style="font-size:2rem;font-weight:700;color:var(--text-primary);margin:0.3rem 0">—</div>
+            </div>
+        </div>
+
+        <!-- KPI Cards Row 2: Profit -->
+        <div style="margin-bottom:0.5rem;color:var(--text-secondary);font-size:0.8rem;text-transform:uppercase;letter-spacing:1px">Profitability</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem;">
+            <div style="background:var(--background-light);border:1px solid #e74c3c33;border-radius:12px;padding:1.5rem;">
+                <div style="color:var(--text-secondary);font-size:0.8rem;text-transform:uppercase;letter-spacing:0.5px">Cost of Goods (COGS)</div>
+                <div id="pr_cogs" style="font-size:2rem;font-weight:700;color:#e74c3c;margin:0.3rem 0">—</div>
+                <div style="font-size:0.8rem;color:var(--text-secondary)">ingredient costs</div>
+            </div>
+            <div style="background:var(--background-light);border:1px solid #4caf5033;border-radius:12px;padding:1.5rem;">
+                <div style="color:var(--text-secondary);font-size:0.8rem;text-transform:uppercase;letter-spacing:0.5px">Gross Profit</div>
+                <div id="pr_grossProfit" style="font-size:2rem;font-weight:700;color:#4caf50;margin:0.3rem 0">—</div>
+                <div style="font-size:0.8rem;color:var(--text-secondary)">Margin: <span id="pr_grossMargin">—</span></div>
+            </div>
+            <div style="background:var(--background-light);border:1px solid var(--border-light);border-radius:12px;padding:1.5rem;">
+                <div style="color:var(--text-secondary);font-size:0.8rem;text-transform:uppercase;letter-spacing:0.5px">Operating Expenses</div>
+                <div id="pr_expenses" style="font-size:2rem;font-weight:700;color:#f39c12;margin:0.3rem 0">—</div>
+                <div style="font-size:0.8rem;color:var(--text-secondary)">rent, salary, etc.</div>
+            </div>
+        </div>
+
+        <!-- Net Profit Banner -->
+        <div style="background:linear-gradient(135deg,#1a2a1a,#243024);border:2px solid #4caf5066;border-radius:12px;padding:1.5rem 2rem;margin-bottom:1.5rem;display:flex;justify-content:space-between;align-items:center;">
+            <div>
+                <div style="color:#a0a0a0;font-size:0.85rem;text-transform:uppercase;letter-spacing:1px">Net Profit (after all expenses)</div>
+                <div id="pr_netProfit" style="font-size:2.5rem;font-weight:700;color:#4caf50;margin-top:0.25rem">—</div>
+            </div>
+            <div style="text-align:right">
+                <div style="color:#a0a0a0;font-size:0.85rem">Net Margin</div>
+                <div id="pr_netMargin" style="font-size:1.8rem;font-weight:700;color:#4caf50">—</div>
+            </div>
+        </div>
+
+        <!-- Trend Chart + Expense Inputs side by side -->
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;margin-bottom:1.5rem;">
+
+            <!-- Trend Chart -->
+            <div style="background:var(--background-light);border:1px solid var(--border-light);border-radius:12px;padding:1.5rem;">
+                <h3 style="color:var(--accent-gold);margin-bottom:1rem"><i class="fas fa-chart-line"></i> Revenue vs Cost vs Profit Trend</h3>
+                <canvas id="pr_trendChart" style="max-height:280px"></canvas>
+            </div>
+
+            <!-- Expense Inputs -->
+            <div style="background:var(--background-light);border:1px solid var(--border-light);border-radius:12px;padding:1.5rem;">
+                <h3 style="color:var(--accent-gold);margin-bottom:1rem"><i class="fas fa-receipt"></i> Operating Expenses</h3>
+                <p style="color:var(--text-secondary);font-size:0.82rem;margin-bottom:1rem">Enter monthly amounts. Saved locally.</p>
+                <div style="display:flex;flex-direction:column;gap:0.75rem">
+                    <div>
+                        <label style="color:var(--text-secondary);font-size:0.8rem;display:block;margin-bottom:3px">Rent</label>
+                        <input type="number" id="pr_exp_rent" placeholder="0.00" step="0.01" min="0"
+                            style="width:100%;background:var(--background-dark);border:1px solid var(--border-light);border-radius:8px;color:var(--text-primary);padding:8px 10px">
+                    </div>
+                    <div>
+                        <label style="color:var(--text-secondary);font-size:0.8rem;display:block;margin-bottom:3px">Salary</label>
+                        <input type="number" id="pr_exp_salary" placeholder="0.00" step="0.01" min="0"
+                            style="width:100%;background:var(--background-dark);border:1px solid var(--border-light);border-radius:8px;color:var(--text-primary);padding:8px 10px">
+                    </div>
+                    <div>
+                        <label style="color:var(--text-secondary);font-size:0.8rem;display:block;margin-bottom:3px">Utilities</label>
+                        <input type="number" id="pr_exp_utilities" placeholder="0.00" step="0.01" min="0"
+                            style="width:100%;background:var(--background-dark);border:1px solid var(--border-light);border-radius:8px;color:var(--text-primary);padding:8px 10px">
+                    </div>
+                    <div>
+                        <label style="color:var(--text-secondary);font-size:0.8rem;display:block;margin-bottom:3px">Marketing</label>
+                        <input type="number" id="pr_exp_marketing" placeholder="0.00" step="0.01" min="0"
+                            style="width:100%;background:var(--background-dark);border:1px solid var(--border-light);border-radius:8px;color:var(--text-primary);padding:8px 10px">
+                    </div>
+                    <div>
+                        <label style="color:var(--text-secondary);font-size:0.8rem;display:block;margin-bottom:3px">Other</label>
+                        <input type="number" id="pr_exp_other" placeholder="0.00" step="0.01" min="0"
+                            style="width:100%;background:var(--background-dark);border:1px solid var(--border-light);border-radius:8px;color:var(--text-primary);padding:8px 10px">
+                    </div>
+                    <button id="pr_saveExpenses" class="btn btn-primary" onclick="ProfitReport.saveExpenses()" style="margin-top:0.5rem">
+                        Save &amp; Recalculate
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Performance Table -->
+        <div style="background:var(--background-light);border:1px solid var(--border-light);border-radius:12px;padding:1.5rem;">
+            <h3 style="color:var(--accent-gold);margin-bottom:1rem"><i class="fas fa-trophy"></i> Product Performance</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th style="text-align:center">Qty Sold</th>
+                            <th style="text-align:right">Revenue</th>
+                            <th style="text-align:right">COGS</th>
+                            <th style="text-align:right">Profit (Margin)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pr_productBody">
+                        <tr><td colspan="6" style="text-align:center;color:var(--text-secondary);padding:2rem">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div><!-- /profitReportSection -->
+
     </section>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -521,6 +671,7 @@
     <script src="/src/assets/js/admin.js"></script>
     <script src="/src/assets/js/reports.js"></script>
     <script src="/src/assets/js/inventory.js"></script>
+    <script src="/src/assets/js/profit-report.js"></script>
 
     <script>
         // Audio notification system
