@@ -512,9 +512,10 @@ class SimpleCashier {
                 }
 
                 for (const recipe of recipes) {
-                    const deduction    = recipe.quantity_required * item.quantity;
-                    const prevStock    = parseFloat(recipe.ingredients.current_stock);
-                    const newStock     = Math.max(0, prevStock - deduction);
+                    // Round to 4 decimal places — matches DECIMAL(18,4) column
+                    const deduction    = Math.round(recipe.quantity_required * item.quantity * 10000) / 10000;
+                    const prevStock    = Math.round(parseFloat(recipe.ingredients.current_stock) * 10000) / 10000;
+                    const newStock     = Math.round(Math.max(0, prevStock - deduction) * 10000) / 10000;
 
                     const { error: movErr } = await window.supabaseClient
                         .from('stock_movements')
