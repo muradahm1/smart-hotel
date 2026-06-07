@@ -51,14 +51,22 @@ function renderIngredients(items) {
         return;
     }
 
+    // Use the highest stock value across all items as the scale reference
+    const maxStock = Math.max(...items.map(i => parseFloat(i.current_stock) || 0), 1);
+
     grid.innerHTML = items.map(item => {
-        const pct = item.min_stock_level > 0
-            ? Math.min(100, (item.current_stock / item.min_stock_level) * 100)
-            : 100;
-        const statusClass = item.current_stock <= 0 ? 'out'
-            : item.current_stock <= item.min_stock_level ? 'low' : 'ok';
+        const stock    = parseFloat(item.current_stock) || 0;
+        const minLevel = parseFloat(item.min_stock_level) || 0;
+
+        // Bar fills relative to the highest stock in the list so differences are visible
+        const pct = Math.min(100, Math.round((stock / maxStock) * 100));
+
+        const statusClass = stock <= 0         ? 'out'
+                          : stock <= minLevel  ? 'low'
+                          : 'ok';
         const statusLabel = statusClass === 'out' ? 'Out of Stock'
-            : statusClass === 'low' ? 'Low Stock' : 'In Stock';
+                          : statusClass === 'low' ? 'Low Stock'
+                          : 'In Stock';
 
         return `
         <div class="inv-card">
@@ -69,12 +77,12 @@ function renderIngredients(items) {
                 </div>
                 <span class="inv-status inv-status-${statusClass}">${statusLabel}</span>
             </div>
-            <div class="inv-stock-bar">
+            <div class="inv-stock-bar" title="${stock} ${item.base_unit} remaining">
                 <div class="inv-stock-fill inv-fill-${statusClass}" style="width:${pct}%"></div>
             </div>
             <div class="inv-card-meta">
-                <span><strong>${item.current_stock}</strong> ${item.base_unit}</span>
-                <span>Min: ${item.min_stock_level} ${item.base_unit}</span>
+                <span><strong>${stock}</strong> ${item.base_unit}</span>
+                <span>Min: ${minLevel} ${item.base_unit}</span>
                 <span>Cost: ${formatCurrency(item.cost_per_unit)}/${item.base_unit}</span>
             </div>
             <div class="inv-card-actions">
