@@ -136,19 +136,16 @@ function showSection(sectionName) {
         const btn = document.querySelector('[onclick="showSection(\'profitReport\')"]');
         if (btn) btn.classList.add('active');
         if (window.ProfitReport) ProfitReport.load();
-    }
+    } else if (sectionName === 'shifts') {
         let shiftsSection = document.getElementById('shiftsSection');
         if (!shiftsSection) {
             createShiftsSection();
             shiftsSection = document.getElementById('shiftsSection');
         }
-        
         if (shiftsSection) {
             shiftsSection.style.display = 'block';
             const shiftsBtn = document.querySelector('[onclick="showSection(\'shifts\')"]');
-            if (shiftsBtn) {
-                shiftsBtn.classList.add('active');
-            }
+            if (shiftsBtn) shiftsBtn.classList.add('active');
             loadShifts();
         }
     }
