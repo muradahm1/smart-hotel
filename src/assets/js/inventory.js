@@ -280,3 +280,268 @@ window.submitStockModal = async function () {
         showNotification('Error: ' + err.message, 'error');
     }
 };
+
+// ── Recipe Manager ────────────────────────────────────────────
+
+const RecipeManager = (() => {
+    let _menuItems   = [];
+    let _ingredients = [];
+    let _recipes     = [];
+
+    // ── Data ─────────────────────────────────────────────────
+    async function _fetchAll() {
+        const sb = window.supabaseClient;
+        const [mi, ing, rec] = await Promise.all([
+            sb.from('menu_items').select('id,name,price,category').order('name'),
+            sb.from('ingredients').select('id,name,base_unit,cost_per_unit').order('name'),
+            sb.from('recipes').select(`
+                id, menu_item_id, ingredient_id, quantity_required, unit,
+                menu_items(id,name,price),
+                ingredients(id,name,base_unit,cost_per_unit)
+            `).order('menu_item_id')
+        ]);
+        _menuItems   = mi.data  || [];
+        _ingredients = ing.data || [];
+        _recipes     = rec.data || [];
+    }
+
+    // ── Populate selects ──────────────────────────────────────
+    function _populateSelects() {
+        // Filter dropdown
+        const filter = document.getElementById('recipeFilterItem');
+        if (filter) {
+            const current = filter.value;
+            filter.innerHTML = '<option value="">All menu items</option>' +
+                _menuItems.map(m => `<option value="${m.id}" ${m.id===current?'selected':''}>${m.name}</option>`).join('');
+        }
+
+        // Form menu item select
+        const miSel = document.getElementById('recipeMenuItem');
+        if (miSel) {
+            const current = miSel.value;
+            miSel.innerHTML = '<option value="">Select menu item...</option>' +
+                _menuItems.map(m => `<option value="${m.id}" ${m.id===current?'selected':''}>${m.name} (${formatCurrency(m.price)})</option>`).join('');
+        }
+
+        // Form ingredient select
+        const ingSel = document.getElementById('recipeIngredient');
+        if (ingSel) {
+            const current = ingSel.value;
+            ingSel.innerHTML = '<option value="">Select ingredient...</option>' +
+                _ingredients.map(i => `<option value="${i.id}" ${i.id===current?'selected':''}
+                    data-unit="${i.base_unit}" data-cost="${i.cost_per_unit}">
+                    ${i.name} (${i.base_unit} · ${formatCurrency(i.cost_per_unit)}/unit)
+                </option>`).join('');
+        }
+    }
+
+    // ── Render table ──────────────────────────────────────────
+    function _renderTable() {
+        const tbody  = document.getElementById('recipesTableBody');
+        const filter = document.getElementById('recipeFilterItem')?.value;
+
+        const rows = filter
+            ? _recipes.filter(r => r.menu_item_id === filter)
+            : _recipes;
+
+        if (!rows.length) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-secondary)">
+                No recipes yet. Click "Add Recipe Row" to link a menu item to its ingredients.
+            </td></tr>`;
+            _renderSummary([]);
+            return;
+        }
+
+        // Group by menu item for zebra banding
+        let lastItemId = null;
+        let band = false;
+
+        tbody.innerHTML = rows.map(r => {
+            if (r.menu_item_id !== lastItemId) {
+                lastItemId = r.menu_item_id;
+                band = !band;
+            }
+            const unitCost  = parseFloat(r.ingredients?.cost_per_unit || 0);
+            const qty       = parseFloat(r.quantity_required || 0);
+            const lineCost  = unitCost * qty;
+            const bg        = band ? 'background:rgba(201,180,140,0.04)' : '';
+
+            return `<tr style="border-bottom:1px solid var(--border-light);${bg}">
+                <td style="padding:0.8rem 1rem;color:var(--accent-gold);font-weight:600">${r.menu_items?.name || '—'}</td>
+                <td style="padding:0.8rem 1rem">${r.ingredients?.name || '—'}</td>
+                <td style="padding:0.8rem 1rem;text-align:right">${qty} ${r.unit}</td>
+                <td style="padding:0.8rem 1rem;text-align:right;color:var(--text-secondary)">${formatCurrency(unitCost)}/${r.unit}</td>
+                <td style="padding:0.8rem 1rem;text-align:right;color:#e74c3c;font-weight:600">${formatCurrency(lineCost)}</td>
+                <td style="padding:0.8rem 1rem;text-align:center">
+                    <button class="btn btn-outline btn-sm" onclick="RecipeManager.edit('${r.id}')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-danger btn-sm" style="margin-left:0.3rem" onclick="RecipeManager.remove('${r.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>`;
+        }).join('');
+
+        _renderSummary(rows);
+    }
+
+    // ── Cost summary per menu item ────────────────────────────
+    function _renderSummary(rows) {
+        const summary = document.getElementById('recipeSummary');
+        const body    = document.getElementById('recipeSummaryBody');
+        if (!summary || !body) return;
+
+        const byItem = {};
+        rows.forEach(r => {
+            const id   = r.menu_item_id;
+            const name = r.menu_items?.name || '—';
+            const price= parseFloat(r.menu_items?.price || 0);
+            const cost = parseFloat(r.ingredients?.cost_per_unit || 0) * parseFloat(r.quantity_required || 0);
+            if (!byItem[id]) byItem[id] = { name, price, totalCost: 0 };
+            byItem[id].totalCost += cost;
+        });
+
+        const items = Object.values(byItem);
+        if (!items.length) { summary.style.display = 'none'; return; }
+        summary.style.display = 'block';
+
+        body.innerHTML = items.map(item => {
+            const margin = item.price > 0 ? ((item.price - item.totalCost) / item.price * 100) : 0;
+            const color  = margin > 60 ? '#4caf50' : margin > 30 ? '#f39c12' : '#e74c3c';
+            return `<div style="background:var(--background-dark);border-radius:8px;padding:0.9rem 1rem;border:1px solid var(--border-light)">
+                <div style="font-weight:600;color:var(--text-primary);margin-bottom:0.4rem">${item.name}</div>
+                <div style="font-size:0.82rem;color:var(--text-secondary)">Sell price: <strong style="color:var(--accent-gold)">${formatCurrency(item.price)}</strong></div>
+                <div style="font-size:0.82rem;color:var(--text-secondary)">Ingredient cost: <strong style="color:#e74c3c">${formatCurrency(item.totalCost)}</strong></div>
+                <div style="font-size:0.82rem;color:var(--text-secondary)">Gross margin: <strong style="color:${color}">${margin.toFixed(1)}%</strong></div>
+            </div>`;
+        }).join('');
+    }
+
+    // ── Cost preview while typing ─────────────────────────────
+    function onIngredientChange() {
+        const sel     = document.getElementById('recipeIngredient');
+        const opt     = sel?.options[sel.selectedIndex];
+        const unit    = opt?.dataset?.unit || '—';
+        const cost    = parseFloat(opt?.dataset?.cost || 0);
+        const qty     = parseFloat(document.getElementById('recipeQty')?.value || 0);
+
+        document.getElementById('recipeUnit').textContent = unit;
+
+        const preview = document.getElementById('recipeCostPreview');
+        const val     = document.getElementById('recipeCostValue');
+        if (preview && val && cost > 0) {
+            preview.style.display = 'block';
+            val.textContent = formatCurrency(cost * (qty || 1));
+
+            // update on qty change too
+            document.getElementById('recipeQty').oninput = () => {
+                const q = parseFloat(document.getElementById('recipeQty').value || 0);
+                val.textContent = formatCurrency(cost * q);
+            };
+        }
+    }
+
+    // ── CRUD ──────────────────────────────────────────────────
+    async function save() {
+        const id  = document.getElementById('recipeEditId').value;
+        const mid = document.getElementById('recipeMenuItem').value;
+        const iid = document.getElementById('recipeIngredient').value;
+        const qty = parseFloat(document.getElementById('recipeQty').value);
+
+        const sel  = document.getElementById('recipeIngredient');
+        const unit = sel?.options[sel.selectedIndex]?.dataset?.unit || 'g';
+
+        if (!mid || !iid || !qty || qty <= 0) {
+            showNotification('Fill in all fields with a valid quantity', 'error');
+            return;
+        }
+
+        try {
+            let err;
+            if (id) {
+                ({ error: err } = await window.supabaseClient
+                    .from('recipes')
+                    .update({ menu_item_id: mid, ingredient_id: iid, quantity_required: qty, unit })
+                    .eq('id', id));
+            } else {
+                // Check duplicate
+                const dup = _recipes.find(r => r.menu_item_id === mid && r.ingredient_id === iid);
+                if (dup) {
+                    showNotification('This ingredient is already in that recipe. Edit the existing row instead.', 'error');
+                    return;
+                }
+                ({ error: err } = await window.supabaseClient
+                    .from('recipes')
+                    .insert([{ menu_item_id: mid, ingredient_id: iid, quantity_required: qty, unit }]));
+            }
+
+            if (err) throw err;
+            showNotification(id ? 'Recipe updated' : 'Recipe row added', 'success');
+            hideForm();
+            await load();
+        } catch (e) {
+            showNotification('Error: ' + e.message, 'error');
+        }
+    }
+
+    async function remove(id) {
+        if (!confirm('Delete this recipe row?')) return;
+        const { error } = await window.supabaseClient.from('recipes').delete().eq('id', id);
+        if (error) { showNotification('Delete failed: ' + error.message, 'error'); return; }
+        showNotification('Recipe row deleted', 'success');
+        await load();
+    }
+
+    function edit(id) {
+        const r = _recipes.find(r => r.id === id);
+        if (!r) return;
+
+        showAddForm();
+        document.getElementById('recipeFormTitle').textContent = 'Edit Recipe Row';
+        document.getElementById('recipeEditId').value          = r.id;
+        document.getElementById('recipeMenuItem').value        = r.menu_item_id;
+        document.getElementById('recipeIngredient').value      = r.ingredient_id;
+        document.getElementById('recipeQty').value             = r.quantity_required;
+        onIngredientChange();
+    }
+
+    // ── UI helpers ────────────────────────────────────────────
+    function showAddForm() {
+        document.getElementById('recipeFormTitle').textContent = 'Add Recipe Row';
+        document.getElementById('recipeEditId').value = '';
+        document.getElementById('recipeMenuItem').value = '';
+        document.getElementById('recipeIngredient').value = '';
+        document.getElementById('recipeQty').value = '';
+        document.getElementById('recipeUnit').textContent = '—';
+        document.getElementById('recipeCostPreview').style.display = 'none';
+        document.getElementById('recipeForm').style.display = 'block';
+        document.getElementById('recipeForm').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function hideForm() {
+        document.getElementById('recipeForm').style.display = 'none';
+    }
+
+    // ── Main load ─────────────────────────────────────────────
+    async function load() {
+        try {
+            await _fetchAll();
+            _populateSelects();
+            _renderTable();
+        } catch (e) {
+            console.error('RecipeManager load error:', e);
+        }
+    }
+
+    return { load, save, edit, remove, showAddForm, hideForm, onIngredientChange };
+})();
+
+window.RecipeManager = RecipeManager;
+
+// Hook into inventory dashboard load
+const _origLoadInventory = loadInventoryDashboard;
+window.loadInventoryDashboard = async function () {
+    await _origLoadInventory();
+    await RecipeManager.load();
+};

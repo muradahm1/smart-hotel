@@ -489,7 +489,86 @@
 
             <!-- Ingredients Grid -->
             <div id="ingredientsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;"></div>
-        </div>
+
+            <!-- ── Recipe Manager ──────────────────────────────── -->
+            <div style="margin-top:2rem;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                    <h2 style="color:var(--accent-gold)"><i class="fas fa-book-open"></i> Recipe Manager <small style="font-size:0.75rem;color:var(--text-secondary);font-weight:400;margin-left:0.5rem">Links menu items to ingredients for real COGS</small></h2>
+                    <button class="btn btn-primary" onclick="RecipeManager.showAddForm()">
+                        <i class="fas fa-plus"></i> Add Recipe Row
+                    </button>
+                </div>
+
+                <!-- Filter by menu item -->
+                <div style="display:flex;gap:1rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;">
+                    <label style="color:var(--text-secondary);font-size:0.9rem">Filter by item:</label>
+                    <select id="recipeFilterItem" onchange="RecipeManager.load()" style="background:var(--background-dark);border:1px solid var(--border-light);border-radius:8px;color:var(--text-primary);padding:8px 12px;min-width:200px">
+                        <option value="">All menu items</option>
+                    </select>
+                </div>
+
+                <!-- Add/Edit Form -->
+                <div id="recipeForm" style="display:none;background:var(--background-light);border:1px solid var(--accent-gold);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;">
+                    <h4 style="color:var(--accent-gold);margin-bottom:1rem" id="recipeFormTitle">Add Recipe Row</h4>
+                    <input type="hidden" id="recipeEditId">
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label>Menu Item *</label>
+                            <select id="recipeMenuItem" style="width:100%;background:var(--background-dark);border:1px solid var(--border-light);border-radius:8px;color:var(--text-primary);padding:10px 12px">
+                                <option value="">Select menu item...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Ingredient *</label>
+                            <select id="recipeIngredient" onchange="RecipeManager.onIngredientChange()" style="width:100%;background:var(--background-dark);border:1px solid var(--border-light);border-radius:8px;color:var(--text-primary);padding:10px 12px">
+                                <option value="">Select ingredient...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Quantity Required *</label>
+                            <div style="display:flex;gap:0.5rem;align-items:center">
+                                <input type="number" id="recipeQty" step="0.001" min="0.001" placeholder="e.g. 200"
+                                    style="flex:1;background:var(--background-dark);border:1px solid var(--border-light);border-radius:8px;color:var(--text-primary);padding:10px 12px">
+                                <span id="recipeUnit" style="color:var(--accent-gold);font-weight:600;min-width:30px">—</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Cost preview -->
+                    <div id="recipeCostPreview" style="background:var(--background-dark);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.9rem;color:var(--text-secondary);display:none">
+                        Cost preview: <strong id="recipeCostValue" style="color:var(--accent-gold)">—</strong> per serving
+                    </div>
+                    <div class="form-buttons">
+                        <button class="btn btn-primary" onclick="RecipeManager.save()">Save</button>
+                        <button class="btn btn-secondary" onclick="RecipeManager.hideForm()">Cancel</button>
+                    </div>
+                </div>
+
+                <!-- Recipes Table -->
+                <div style="background:var(--background-light);border:1px solid var(--border-light);border-radius:12px;overflow:hidden;">
+                    <table style="width:100%;border-collapse:collapse;">
+                        <thead>
+                            <tr style="background:var(--background-dark);">
+                                <th style="padding:0.9rem 1rem;text-align:left;color:var(--accent-gold);font-weight:600">Menu Item</th>
+                                <th style="padding:0.9rem 1rem;text-align:left;color:var(--accent-gold);font-weight:600">Ingredient</th>
+                                <th style="padding:0.9rem 1rem;text-align:right;color:var(--accent-gold);font-weight:600">Qty Required</th>
+                                <th style="padding:0.9rem 1rem;text-align:right;color:var(--accent-gold);font-weight:600">Unit Cost</th>
+                                <th style="padding:0.9rem 1rem;text-align:right;color:var(--accent-gold);font-weight:600">Line Cost</th>
+                                <th style="padding:0.9rem 1rem;text-align:center;color:var(--accent-gold);font-weight:600">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recipesTableBody">
+                            <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-secondary)">Loading recipes...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Per-item cost summary -->
+                <div id="recipeSummary" style="margin-top:1rem;display:none;background:var(--background-light);border:1px solid var(--border-light);border-radius:12px;padding:1rem 1.5rem;">
+                    <h4 style="color:var(--accent-gold);margin-bottom:0.75rem"><i class="fas fa-calculator"></i> Cost Summary per Menu Item</h4>
+                    <div id="recipeSummaryBody" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0.75rem;"></div>
+                </div>
+            </div>
+        </div><!-- /inventorySection -->
 
         <!-- ── Stock Movement Modal ──────────────────────────── -->
         <div id="stockModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;">
