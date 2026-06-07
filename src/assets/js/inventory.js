@@ -88,22 +88,15 @@ function updateInventoryStats(items) {
 // ── Low Stock Alerts ─────────────────────────────────────────
 
 async function loadLowStockAlerts() {
+    const panel = document.getElementById('lowStockAlerts');
+    if (!panel) return;
     try {
         const { data, error } = await window.supabaseClient
             .from('ingredients')
-            .select('name, current_stock, min_stock_level, base_unit')
-            .lte('current_stock', window.supabaseClient.rpc ? undefined : undefined);
-
-        // Fetch all and filter client-side (avoids complex RPC)
-        const { data: all, error: err2 } = await window.supabaseClient
-            .from('ingredients')
             .select('name, current_stock, min_stock_level, base_unit');
+        if (error) throw error;
 
-        if (err2) return;
-        const alerts = (all || []).filter(i => i.current_stock <= i.min_stock_level);
-        const panel = document.getElementById('lowStockAlerts');
-        if (!panel) return;
-
+        const alerts = (data || []).filter(i => i.current_stock <= i.min_stock_level);
         if (!alerts.length) {
             panel.innerHTML = '<p style="color:#4caf50"><i class="fas fa-check-circle"></i> All stock levels are healthy.</p>';
             return;
@@ -113,7 +106,9 @@ async function loadLowStockAlerts() {
                 <i class="fas fa-exclamation-triangle" style="color:#f39c12"></i>
                 <span><strong>${a.name}</strong> — ${a.current_stock} ${a.base_unit} remaining (min: ${a.min_stock_level})</span>
             </div>`).join('');
-    } catch (_) {}
+    } catch (err) {
+        panel.innerHTML = `<p style="color:#e74c3c">Could not load alerts: ${err.message}</p>`;
+    }
 }
 
 // ── Add Ingredient ───────────────────────────────────────────
@@ -132,8 +127,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (form) form.addEventListener('submit', saveIngredient);
 });
 
+async function getSession() {
+    const { data } = await window.supabaseClient.auth.getSession();
+    return data?.session;
+}
+
 async function saveIngredient(e) {
     e.preventDefault();
+
+    const session = await getSession();
+    if (!session) {
+        showNotification('You must be logged in to add ingredients', 'error');
+        return;
+    }
+
     const data = {
         name: document.getElementById('ingName').value.trim(),
         category: document.getElementById('ingCategory').value.trim(),
@@ -158,6 +165,13 @@ async function saveIngredient(e) {
 
 async function deleteIngredient(id) {
     if (!confirm('Delete this ingredient?')) return;
+
+    const session = await getSession();
+    if (!session) {
+        showNotification('You must be logged in to delete ingredients', 'error');
+        return;
+    }
+
     try {
         const { error } = await window.supabaseClient.from('ingredients').delete().eq('id', id);
         if (error) throw error;
@@ -194,6 +208,12 @@ window.closeStockModal = function () {
 };
 
 window.submitStockModal = async function () {
+    const session = await getSession();
+    if (!session) {
+        showNotification('You must be logged in to update stock', 'error');
+        return;
+    }
+
     const ingId = document.getElementById('stockModalIngId').value;
     const type = document.getElementById('stockModalType').value;
     const qty = parseFloat(document.getElementById('stockModalQty').value);

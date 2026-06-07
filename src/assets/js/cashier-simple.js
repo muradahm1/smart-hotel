@@ -460,9 +460,6 @@ class SimpleCashier {
             this.printReceipt(this.currentOrder, transaction);
             this.showNotification('Payment processed successfully!', 'success');
             
-            // Trigger Inventory Deduction
-            this.deductInventory(this.currentOrder);
-            
             setTimeout(() => {
                 this.closeModal();
                 this.loadOrders();
@@ -478,33 +475,41 @@ class SimpleCashier {
     async deductInventory(order) {
         console.log('📦 Starting Inventory Deduction for Order:', order.id);
         try {
+            const { data: { user } } = await window.supabaseClient.auth.getUser();
+
             for (const item of order.order_items) {
                 // 1. Fetch recipe for this menu item
-                const { data: recipeItems, error } = await supabaseClient
+                const { data: recipeItems, error } = await window.supabaseClient
                     .from('recipes')
-                    .select('*, ingredients(*)')
+                    .select('quantity_required, ingredient_id, ingredients(current_stock)')
                     .eq('menu_item_id', item.menu_item_id);
 
-                if (error || !recipeItems) continue;
+                if (error || !recipeItems || recipeItems.length === 0) {
+                    console.warn(`No recipe found for menu_item_id: ${item.menu_item_id} (${item.menu_items?.name})`);
+                    continue;
+                }
 
                 for (const recipe of recipeItems) {
                     const totalDeduction = recipe.quantity_required * item.quantity;
-                    const currentStock = recipe.ingredients.current_stock;
-                    const newStock = currentStock - totalDeduction;
+                    const currentStock = parseFloat(recipe.ingredients.current_stock);
+                    const newStock = Math.max(0, currentStock - totalDeduction);
 
-                    // 2. Log movement (Trigger will update ingredients table)
-                    await supabaseClient
+                    // 2. Log movement — trigger auto-updates current_stock
+                    const { error: movErr } = await window.supabaseClient
                         .from('stock_movements')
                         .insert([{
                             ingredient_id: recipe.ingredient_id,
-                            user_id: (await supabase.auth.getUser()).data.user.id,
+                            user_id: user?.id || null,
                             type: 'sale',
                             quantity_change: -totalDeduction,
                             previous_quantity: currentStock,
                             new_quantity: newStock,
                             reference_id: order.id,
-                            notes: `Sale of ${item.quantity}x ${item.menu_items.name}`
+                            notes: `Sale: ${item.quantity}x ${item.menu_items?.name}`
                         }]);
+
+                    if (movErr) console.error('Stock movement insert failed:', movErr);
+                    else console.log(`✅ Deducted ${totalDeduction} from ingredient ${recipe.ingredient_id}`);
                 }
             }
         } catch (err) {
@@ -671,7 +676,7 @@ class SimpleCashier {
 
     async printAndCloseOrder(orderId) {
         try {
-            const { data: order } = await supabaseClient
+            const { data: order } = await window.supabaseClient
                 .from('orders')
                 .select(`*, order_items (*, menu_items (name, price))`)
                 .eq('id', orderId)
@@ -679,7 +684,6 @@ class SimpleCashier {
 
             if (!order) { this.showNotification('Order not found', 'error'); return; }
 
-            // Print the receipt
             const transaction = {
                 payment_method: this.selectedPaymentMethod || 'cash',
                 amount: order.total_amount,
@@ -688,13 +692,15 @@ class SimpleCashier {
             };
             this.printReceipt(order, transaction);
 
-            // Mark order as completed so it drops off both cashier and hostess
-            const { error } = await supabaseClient
+            const { error } = await window.supabaseClient
                 .from('orders')
                 .update({ status: 'completed', updated_at: new Date().toISOString() })
                 .eq('id', orderId);
 
             if (error) throw error;
+
+            // Deduct inventory on close
+            await this.deductInventory(order);
 
             this.showNotification('Receipt printed & order closed!', 'success');
             this.closeModal();
