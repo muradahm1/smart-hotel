@@ -251,15 +251,9 @@ class SimpleCashier {
 
     async selectOrder(orderId, clickEvent) {
         try {
-            const { data: order } = await supabaseClient
+            const { data: order } = await window.supabaseClient
                 .from('orders')
-                .select(`
-                    *,
-                    order_items (
-                        *,
-                        menu_items (name, price)
-                    )
-                `)
+                .select(`*, order_items (id, quantity, price, menu_item_id, menu_items (name, price))`)
                 .eq('id', orderId)
                 .single();
 
@@ -422,12 +416,20 @@ class SimpleCashier {
             // Try online sync first
             if (navigator.onLine && window.supabaseClient) {
                 try {
-                    const { error: transactionError } = await supabaseClient
+                    const { error: transactionError } = await window.supabaseClient
                         .from('transactions')
-                        .insert([transaction]);
+                        .insert([{
+                            order_id:       this.currentOrder.id,
+                            payment_method: this.selectedPaymentMethod,
+                            amount:         total,
+                            change_amount:  Math.max(0, received - total),
+                            cashier:        cashierName,
+                            shift_id:       shiftId || null,
+                            created_at:     new Date().toISOString()
+                        }]);
                         
                     if (transactionError) {
-                        console.warn('Transaction insert failed, caching offline:', transactionError);
+                        console.warn('Transaction insert failed:', transactionError);
                         await this.offlineCache.cachePendingTransaction(transaction);
                     }
                 } catch (transactionErr) {
@@ -435,7 +437,7 @@ class SimpleCashier {
                     await this.offlineCache.cachePendingTransaction(transaction);
                 }
                 
-                const { error: orderError } = await supabaseClient
+            const { error: orderError } = await window.supabaseClient
                     .from('orders')
                     .update({ 
                         status: 'completed',
@@ -473,47 +475,69 @@ class SimpleCashier {
     }
 
     async deductInventory(order) {
-        console.log('📦 Starting Inventory Deduction for Order:', order.id);
+        console.log('📦 Deducting inventory for order:', order.id);
+        console.log('📦 Order items:', order.order_items);
+
         try {
             const { data: { user } } = await window.supabaseClient.auth.getUser();
 
             for (const item of order.order_items) {
-                // 1. Fetch recipe for this menu item
-                const { data: recipeItems, error } = await window.supabaseClient
-                    .from('recipes')
-                    .select('quantity_required, ingredient_id, ingredients(current_stock)')
-                    .eq('menu_item_id', item.menu_item_id);
+                const menuItemId = item.menu_item_id;
+                console.log(`🔍 Looking up recipe for menu_item_id: ${menuItemId} (${item.menu_items?.name})`);
 
-                if (error || !recipeItems || recipeItems.length === 0) {
-                    console.warn(`No recipe found for menu_item_id: ${item.menu_item_id} (${item.menu_items?.name})`);
+                if (!menuItemId) {
+                    console.warn('⚠️ item.menu_item_id is missing — skipping', item);
                     continue;
                 }
 
-                for (const recipe of recipeItems) {
-                    const totalDeduction = recipe.quantity_required * item.quantity;
-                    const currentStock = parseFloat(recipe.ingredients.current_stock);
-                    const newStock = Math.max(0, currentStock - totalDeduction);
+                // Fetch recipe + current ingredient stock in one query
+                const { data: recipes, error: recipeErr } = await window.supabaseClient
+                    .from('recipes')
+                    .select(`
+                        quantity_required,
+                        ingredient_id,
+                        ingredients ( id, name, current_stock )
+                    `)
+                    .eq('menu_item_id', menuItemId);
 
-                    // 2. Log movement — trigger auto-updates current_stock
+                if (recipeErr) {
+                    console.error('Recipe fetch error:', recipeErr);
+                    continue;
+                }
+
+                if (!recipes || recipes.length === 0) {
+                    console.warn(`⚠️ No recipe for "${item.menu_items?.name}" — no deduction`);
+                    continue;
+                }
+
+                console.log(`✅ Found ${recipes.length} recipe(s) for "${item.menu_items?.name}"`);
+
+                for (const recipe of recipes) {
+                    const totalDeduction  = recipe.quantity_required * item.quantity;
+                    const currentStock    = parseFloat(recipe.ingredients.current_stock);
+                    const newStock        = Math.max(0, currentStock - totalDeduction);
+
+                    console.log(`   → ${recipe.ingredients.name}: ${currentStock} - ${totalDeduction} = ${newStock}`);
+
                     const { error: movErr } = await window.supabaseClient
                         .from('stock_movements')
                         .insert([{
-                            ingredient_id: recipe.ingredient_id,
-                            user_id: user?.id || null,
-                            type: 'sale',
-                            quantity_change: -totalDeduction,
+                            ingredient_id:     recipe.ingredient_id,
+                            user_id:           user?.id || null,
+                            type:              'sale',
+                            quantity_change:   -totalDeduction,
                             previous_quantity: currentStock,
-                            new_quantity: newStock,
-                            reference_id: order.id,
-                            notes: `Sale: ${item.quantity}x ${item.menu_items?.name}`
+                            new_quantity:      newStock,
+                            reference_id:      order.id,
+                            notes:             `Sale: ${item.quantity}x ${item.menu_items?.name}`
                         }]);
 
-                    if (movErr) console.error('Stock movement insert failed:', movErr);
-                    else console.log(`✅ Deducted ${totalDeduction} from ingredient ${recipe.ingredient_id}`);
+                    if (movErr) console.error('❌ Stock movement failed:', movErr);
+                    else console.log(`✅ Deducted ${totalDeduction} from ${recipe.ingredients.name}`);
                 }
             }
         } catch (err) {
-            console.error('Inventory deduction failed:', err);
+            console.error('❌ Inventory deduction crashed:', err);
         }
     }
 
@@ -678,7 +702,7 @@ class SimpleCashier {
         try {
             const { data: order } = await window.supabaseClient
                 .from('orders')
-                .select(`*, order_items (*, menu_items (name, price))`)
+                .select(`*, order_items (id, quantity, price, menu_item_id, menu_items (name, price))`)
                 .eq('id', orderId)
                 .single();
 
@@ -986,19 +1010,17 @@ class SimpleCashier {
                 }
                 
                 // Create transaction record
-                const transactionData = {
-                    order_id: newOrder.id,
-                    payment_method: 'cash',
-                    amount: total,
-                    change_amount: 0,
-                    cashier: cashierName,
-                    shift_id: shiftId, // Link to shift
-                    created_at: new Date().toISOString()
-                };
-                
-                const { error: transactionError } = await supabaseClient
+                const { error: transactionError } = await window.supabaseClient
                     .from('transactions')
-                    .insert([transactionData]);
+                    .insert([{
+                        order_id:       newOrder.id,
+                        payment_method: 'cash',
+                        amount:         total,
+                        change_amount:  0,
+                        cashier:        cashierName,
+                        shift_id:       shiftId || null,
+                        created_at:     new Date().toISOString()
+                    }]);
                     
                 if (transactionError) {
                     console.warn('Failed to save transaction:', transactionError);
