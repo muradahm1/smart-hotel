@@ -460,6 +460,9 @@ class SimpleCashier {
             this.printReceipt(this.currentOrder, transaction);
             this.showNotification('Payment processed successfully!', 'success');
             
+            // Trigger Inventory Deduction
+            this.deductInventory(this.currentOrder);
+            
             setTimeout(() => {
                 this.closeModal();
                 this.loadOrders();
@@ -469,6 +472,43 @@ class SimpleCashier {
         } catch (error) {
             console.error('Payment failed:', error);
             this.showNotification('Payment processing failed', 'error');
+        }
+    }
+
+    async deductInventory(order) {
+        console.log('📦 Starting Inventory Deduction for Order:', order.id);
+        try {
+            for (const item of order.order_items) {
+                // 1. Fetch recipe for this menu item
+                const { data: recipeItems, error } = await supabaseClient
+                    .from('recipes')
+                    .select('*, ingredients(*)')
+                    .eq('menu_item_id', item.menu_item_id);
+
+                if (error || !recipeItems) continue;
+
+                for (const recipe of recipeItems) {
+                    const totalDeduction = recipe.quantity_required * item.quantity;
+                    const currentStock = recipe.ingredients.current_stock;
+                    const newStock = currentStock - totalDeduction;
+
+                    // 2. Log movement (Trigger will update ingredients table)
+                    await supabaseClient
+                        .from('stock_movements')
+                        .insert([{
+                            ingredient_id: recipe.ingredient_id,
+                            user_id: (await supabase.auth.getUser()).data.user.id,
+                            type: 'sale',
+                            quantity_change: -totalDeduction,
+                            previous_quantity: currentStock,
+                            new_quantity: newStock,
+                            reference_id: order.id,
+                            notes: `Sale of ${item.quantity}x ${item.menu_items.name}`
+                        }]);
+                }
+            }
+        } catch (err) {
+            console.error('Inventory deduction failed:', err);
         }
     }
 

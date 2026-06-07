@@ -47,6 +47,7 @@
                 <button class="nav-btn" onclick="showSection('analytics')">Analytics</button>
                 <button class="nav-btn" onclick="showSection('advanced')">Advanced Analytics</button>
                 <button class="nav-btn" onclick="showSection('menu')">Menu Management</button>
+                <button class="nav-btn" onclick="showSection('inventory')">Inventory</button>
             </div>
             
             <!-- Orders Section -->
@@ -402,6 +403,108 @@
             </div>
         </div>
 
+        <!-- ── Inventory Section ─────────────────────────────── -->
+        <div id="inventorySection" class="admin-section-content" style="display:none;">
+            <div class="admin-header" style="display:flex;justify-content:space-between;align-items:center;">
+                <h1><i class="fas fa-boxes"></i> Inventory Management</h1>
+                <button class="btn btn-primary" onclick="showAddIngredientForm()">
+                    <i class="fas fa-plus"></i> Add Ingredient
+                </button>
+            </div>
+
+            <!-- Stats -->
+            <div class="admin-stats">
+                <div class="stat-card"><h3 id="invTotalItems">0</h3><p>Total Ingredients</p></div>
+                <div class="stat-card"><h3 id="invLowStock" style="color:#f39c12">0</h3><p>Low Stock</p></div>
+                <div class="stat-card"><h3 id="invOutOfStock" style="color:#e74c3c">0</h3><p>Out of Stock</p></div>
+                <div class="stat-card"><h3 id="invTotalValue">0.00</h3><p>Stock Value</p></div>
+            </div>
+
+            <!-- Low Stock Alerts -->
+            <div style="background:var(--background-light);border:1px solid var(--border-light);border-radius:12px;padding:1.2rem 1.5rem;margin-bottom:1.5rem;">
+                <h3 style="color:var(--accent-gold);margin-bottom:0.8rem;"><i class="fas fa-bell"></i> Alerts</h3>
+                <div id="lowStockAlerts">Loading...</div>
+            </div>
+
+            <!-- Add Ingredient Form -->
+            <div id="addIngredientForm" style="display:none;background:var(--background-light);border:1px solid var(--border-light);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;">
+                <h3 style="color:var(--accent-gold);margin-bottom:1rem;">New Ingredient</h3>
+                <form id="ingForm">
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label>Name *</label>
+                            <input type="text" id="ingName" required placeholder="e.g. Arabica Beans">
+                        </div>
+                        <div class="form-group">
+                            <label>Category</label>
+                            <input type="text" id="ingCategory" placeholder="e.g. Coffee Beans">
+                        </div>
+                        <div class="form-group">
+                            <label>SKU</label>
+                            <input type="text" id="ingSku" placeholder="Optional">
+                        </div>
+                    </div>
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label>Base Unit *</label>
+                            <select id="ingUnit" required>
+                                <option value="g">g (grams)</option>
+                                <option value="kg">kg</option>
+                                <option value="ml">ml</option>
+                                <option value="L">L (liters)</option>
+                                <option value="pcs">pcs</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Current Stock</label>
+                            <input type="number" id="ingStock" step="0.01" min="0" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Min Stock Level</label>
+                            <input type="number" id="ingMinStock" step="0.01" min="0" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label>Cost per Unit</label>
+                            <input type="number" id="ingCost" step="0.01" min="0" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label>Supplier</label>
+                            <input type="text" id="ingSupplier" placeholder="Optional">
+                        </div>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="submit" class="btn btn-primary">Save Ingredient</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideAddIngredientForm()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Ingredients Grid -->
+            <div id="ingredientsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;"></div>
+        </div>
+
+        <!-- ── Stock Movement Modal ──────────────────────────── -->
+        <div id="stockModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;">
+            <div style="background:var(--background-light);border-radius:16px;padding:2rem;width:100%;max-width:420px;border:1px solid var(--border-light);">
+                <h3 id="stockModalTitle" style="color:var(--accent-gold);margin-bottom:1.2rem;"></h3>
+                <input type="hidden" id="stockModalIngId">
+                <input type="hidden" id="stockModalType">
+                <div class="form-group">
+                    <label>Quantity (<span id="stockModalUnit"></span>)</label>
+                    <input type="number" id="stockModalQty" step="0.01" min="0.01" placeholder="Enter quantity">
+                </div>
+                <div class="form-group">
+                    <label>Notes (optional)</label>
+                    <input type="text" id="stockModalNotes" placeholder="e.g. Invoice #123">
+                </div>
+                <div class="form-buttons">
+                    <button class="btn btn-primary" onclick="submitStockModal()">Confirm</button>
+                    <button class="btn btn-secondary" onclick="closeStockModal()">Cancel</button>
+                </div>
+            </div>
+        </div>
 
     </section>
 
@@ -412,6 +515,7 @@
     <script src="/src/assets/js/main.js"></script>
     <script src="/src/assets/js/admin.js"></script>
     <script src="/src/assets/js/reports.js"></script>
+    <script src="/src/assets/js/inventory.js"></script>
 
     <script>
         // Audio notification system

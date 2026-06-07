@@ -36,7 +36,6 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         loadOrders();
         listenForOrderUpdates();
-        // Fallback polling every 30 seconds (matches Chef dashboard reliability)
         setInterval(() => {
             console.log('🔄 Polling for updates...');
             loadOrders();
@@ -48,7 +47,6 @@ function initAudio() {
     try {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
         audioEnabled = true;
-        console.log('Audio context initialized for Waiters');
     } catch (e) {
         console.error('Web Audio API not supported', e);
     }
@@ -86,7 +84,6 @@ async function loadOrders() {
     }
     
     try {
-        // Only load orders from today and yesterday for security
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
         yesterday.setHours(0, 0, 0, 0);

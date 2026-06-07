@@ -60,7 +60,7 @@ function setupEventListeners() {
 // Admin Navigation Functions
 function showSection(sectionName) {
     // Hide all sections
-    const sections = ['ordersSection', 'analyticsSection', 'advancedSection', 'menuSection', 'shiftsSection'];
+    const sections = ['ordersSection', 'analyticsSection', 'advancedSection', 'menuSection', 'shiftsSection', 'inventorySection'];
     sections.forEach(section => {
         const element = document.getElementById(section);
         if (element) {
@@ -120,6 +120,16 @@ function showSection(sectionName) {
         if (menuBtn) {
             menuBtn.classList.add('active');
         }
+    } else if (sectionName === 'inventory') {
+        const inventorySection = document.getElementById('inventorySection');
+        if (inventorySection) {
+            inventorySection.style.display = 'block';
+        }
+        const invBtn = document.querySelector('[onclick="showSection(\'inventory\')"]');
+        if (invBtn) {
+            invBtn.classList.add('active');
+        }
+        loadInventoryDashboard();
     } else if (sectionName === 'shifts') {
         let shiftsSection = document.getElementById('shiftsSection');
         if (!shiftsSection) {

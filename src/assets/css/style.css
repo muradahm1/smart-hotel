@@ -4251,3 +4251,105 @@ table tr:hover {
 
     .qr-placeholder { margin-top: 4mm; text-align: center; }
 }
+
+/* ── Inventory Management ─────────────────────────────── */
+.inv-card {
+    background: var(--background-light);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius);
+    padding: 1.2rem;
+    transition: var(--transition);
+}
+
+.inv-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+}
+
+.inv-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.8rem;
+}
+
+.inv-card-header h4 {
+    margin: 0 0 0.2rem;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.inv-card-header small {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.inv-status {
+    padding: 0.2rem 0.7rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.inv-status-ok   { background: #4caf50; color: #fff; }
+.inv-status-low  { background: #f39c12; color: #fff; }
+.inv-status-out  { background: #e74c3c; color: #fff; }
+
+.inv-stock-bar {
+    height: 6px;
+    background: var(--border-light);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 0.8rem;
+}
+
+.inv-stock-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+}
+
+.inv-fill-ok  { background: #4caf50; }
+.inv-fill-low { background: #f39c12; }
+.inv-fill-out { background: #e74c3c; }
+
+.inv-card-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.inv-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.82rem;
+}
+
+.alert-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.alert-row:last-child {
+    border-bottom: none;
+}
+
+@media (max-width: 768px) {
+    #ingredientsGrid {
+        grid-template-columns: 1fr !important;
+    }
+}
