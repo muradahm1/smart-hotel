@@ -1033,7 +1033,7 @@ class SimpleCashier {
         
         // Create order object for receipt
         const manualOrder = {
-            id: 'manual-' + Date.now(),
+            id: (newOrder ? newOrder.id : 'manual-' + Date.now()),
             table_number: null,
             customer_name: 'Walk-in',
             total_amount: total,
@@ -1041,6 +1041,7 @@ class SimpleCashier {
             order_items: this.manualOrderItems.map(item => ({
                 quantity: item.quantity,
                 price: item.price,
+                menu_item_id: item.id,
                 menu_items: { name: item.name, price: item.price }
             }))
         };
@@ -1055,6 +1056,9 @@ class SimpleCashier {
         // Track in localStorage for stats
         this.addToLocalStats(total);
         
+        // Deduct inventory for manual order
+        await this.deductInventory(manualOrder);
+
         this.printReceipt(manualOrder, transaction);
         this.showNotification('Manual order saved and printed!', 'success');
         this.closeManualOrderModal();
