@@ -459,6 +459,10 @@ class SimpleCashier {
 
             this.addToLocalStats(total);
             this.lastTransaction = { order: this.currentOrder, transaction };
+
+            // Deduct inventory for this order
+            await this.deductInventory(this.currentOrder);
+
             this.printReceipt(this.currentOrder, transaction);
             this.showNotification('Payment processed successfully!', 'success');
             
@@ -475,69 +479,63 @@ class SimpleCashier {
     }
 
     async deductInventory(order) {
-        console.log('📦 Deducting inventory for order:', order.id);
-        console.log('📦 Order items:', order.order_items);
+        if (!order?.order_items?.length) return;
+        if (!navigator.onLine || !window.supabaseClient) {
+            console.warn('⚠️ Offline — skipping inventory deduction');
+            return;
+        }
 
+        // Get auth user once; null is fine (anon cashier)
+        let userId = null;
         try {
             const { data: { user } } = await window.supabaseClient.auth.getUser();
+            userId = user?.id || null;
+        } catch (_) {}
 
-            for (const item of order.order_items) {
-                const menuItemId = item.menu_item_id;
-                console.log(`🔍 Looking up recipe for menu_item_id: ${menuItemId} (${item.menu_items?.name})`);
+        for (const item of order.order_items) {
+            const menuItemId = item.menu_item_id;
+            if (!menuItemId) {
+                console.warn('⚠️ Missing menu_item_id — skipping item', item);
+                continue;
+            }
 
-                if (!menuItemId) {
-                    console.warn('⚠️ item.menu_item_id is missing — skipping', item);
-                    continue;
-                }
-
-                // Fetch recipe + current ingredient stock in one query
+            try {
                 const { data: recipes, error: recipeErr } = await window.supabaseClient
                     .from('recipes')
-                    .select(`
-                        quantity_required,
-                        ingredient_id,
-                        ingredients ( id, name, current_stock )
-                    `)
+                    .select('quantity_required, ingredient_id, ingredients(id, name, current_stock)')
                     .eq('menu_item_id', menuItemId);
 
-                if (recipeErr) {
-                    console.error('Recipe fetch error:', recipeErr);
+                if (recipeErr) { console.error('Recipe fetch error:', recipeErr); continue; }
+                if (!recipes?.length) {
+                    console.warn(`⚠️ No recipe for "${item.menu_items?.name}" (id: ${menuItemId}) — skipping`);
                     continue;
                 }
-
-                if (!recipes || recipes.length === 0) {
-                    console.warn(`⚠️ No recipe for "${item.menu_items?.name}" — no deduction`);
-                    continue;
-                }
-
-                console.log(`✅ Found ${recipes.length} recipe(s) for "${item.menu_items?.name}"`);
 
                 for (const recipe of recipes) {
-                    const totalDeduction  = recipe.quantity_required * item.quantity;
-                    const currentStock    = parseFloat(recipe.ingredients.current_stock);
-                    const newStock        = Math.max(0, currentStock - totalDeduction);
-
-                    console.log(`   → ${recipe.ingredients.name}: ${currentStock} - ${totalDeduction} = ${newStock}`);
+                    const deduction    = recipe.quantity_required * item.quantity;
+                    const prevStock    = parseFloat(recipe.ingredients.current_stock);
+                    const newStock     = Math.max(0, prevStock - deduction);
 
                     const { error: movErr } = await window.supabaseClient
                         .from('stock_movements')
                         .insert([{
                             ingredient_id:     recipe.ingredient_id,
-                            user_id:           user?.id || null,
+                            user_id:           userId,
                             type:              'sale',
-                            quantity_change:   -totalDeduction,
-                            previous_quantity: currentStock,
+                            quantity_change:   -deduction,
+                            previous_quantity: prevStock,
                             new_quantity:      newStock,
-                            reference_id:      order.id,
+                            reference_id:      typeof order.id === 'string' && order.id.startsWith('manual-')
+                                                   ? null : order.id,
                             notes:             `Sale: ${item.quantity}x ${item.menu_items?.name}`
                         }]);
 
-                    if (movErr) console.error('❌ Stock movement failed:', movErr);
-                    else console.log(`✅ Deducted ${totalDeduction} from ${recipe.ingredients.name}`);
+                    if (movErr) console.error(`❌ Stock movement failed for ${recipe.ingredients.name}:`, movErr);
+                    else console.log(`✅ Deducted ${deduction} ${recipe.ingredients.name} (${prevStock} → ${newStock})`);
                 }
+            } catch (err) {
+                console.error(`❌ Inventory deduction failed for item ${menuItemId}:`, err);
             }
-        } catch (err) {
-            console.error('❌ Inventory deduction crashed:', err);
         }
     }
 
@@ -958,6 +956,9 @@ class SimpleCashier {
         }
         
         const total = this.manualOrderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+        // declared outside try so it's accessible below
+        let savedOrder = null;
         
         try {
             // Get cashier name
@@ -973,43 +974,38 @@ class SimpleCashier {
             const shiftId = localStorage.getItem('current_shift_id');
             
             // Create order in database
-            const orderData = {
-                table_number: null,
-                customer_name: 'Walk-in',
-                total_amount: total,
-                status: 'completed',
-                order_type: 'manual',
-                created_at: new Date().toISOString()
-            };
-            
             const { data: newOrder, error: orderError } = await supabaseClient
                 .from('orders')
-                .insert([orderData])
+                .insert([{
+                    table_number: null,
+                    customer_name: 'Walk-in',
+                    total_amount: total,
+                    status: 'completed',
+                    order_type: 'manual',
+                    created_at: new Date().toISOString()
+                }])
                 .select()
                 .single();
                 
             if (orderError) {
                 console.warn('Failed to save manual order:', orderError);
             }
-            
-            // Create order items if order was saved
+
             if (newOrder) {
-                const orderItems = this.manualOrderItems.map(item => ({
-                    order_id: newOrder.id,
-                    menu_item_id: item.id,
-                    quantity: item.quantity,
-                    price: item.price
-                }));
-                
+                savedOrder = newOrder;
+
+                // Save order items
                 const { error: itemsError } = await supabaseClient
                     .from('order_items')
-                    .insert(orderItems);
-                    
-                if (itemsError) {
-                    console.warn('Failed to save order items:', itemsError);
-                }
+                    .insert(this.manualOrderItems.map(item => ({
+                        order_id: newOrder.id,
+                        menu_item_id: item.id,
+                        quantity: item.quantity,
+                        price: item.price
+                    })));
+                if (itemsError) console.warn('Failed to save order items:', itemsError);
                 
-                // Create transaction record
+                // Save transaction record
                 const { error: transactionError } = await window.supabaseClient
                     .from('transactions')
                     .insert([{
@@ -1021,19 +1017,16 @@ class SimpleCashier {
                         shift_id:       shiftId || null,
                         created_at:     new Date().toISOString()
                     }]);
-                    
-                if (transactionError) {
-                    console.warn('Failed to save transaction:', transactionError);
-                }
+                if (transactionError) console.warn('Failed to save transaction:', transactionError);
             }
             
         } catch (error) {
             console.warn('Database save failed for manual order:', error);
         }
         
-        // Create order object for receipt
+        // Build the order object used for receipt + inventory deduction
         const manualOrder = {
-            id: (newOrder ? newOrder.id : 'manual-' + Date.now()),
+            id: savedOrder ? savedOrder.id : 'manual-' + Date.now(),
             table_number: null,
             customer_name: 'Walk-in',
             total_amount: total,
@@ -1056,7 +1049,7 @@ class SimpleCashier {
         // Track in localStorage for stats
         this.addToLocalStats(total);
         
-        // Deduct inventory for manual order
+        // Deduct inventory
         await this.deductInventory(manualOrder);
 
         this.printReceipt(manualOrder, transaction);
