@@ -1,4 +1,4 @@
-<!-- Smart Restaurant System | by Assistant -->
+﻿<!-- Smart Restaurant System | by Assistant -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -404,7 +404,7 @@
             </div>
         </div>
 
-        <!-- ── Inventory Section ─────────────────────────────── -->
+        <!-- â”€â”€ Inventory Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
         <div id="inventorySection" class="admin-section-content" style="display:none;">
             <div class="admin-header" style="display:flex;justify-content:space-between;align-items:center;">
                 <h1><i class="fas fa-boxes"></i> Inventory Management</h1>
@@ -490,7 +490,7 @@
             <!-- Ingredients Grid -->
             <div id="ingredientsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;"></div>
 
-            <!-- ── Recipe Manager ──────────────────────────────── -->
+            <!-- â”€â”€ Recipe Manager â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
             <div style="margin-top:2rem;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
                     <h2 style="color:var(--accent-gold)"><i class="fas fa-book-open"></i> Recipe Manager <small style="font-size:0.75rem;color:var(--text-secondary);font-weight:400;margin-left:0.5rem">Links menu items to ingredients for real COGS</small></h2>
@@ -529,13 +529,13 @@
                             <div style="display:flex;gap:0.5rem;align-items:center">
                                 <input type="number" id="recipeQty" step="0.001" min="0.001" placeholder="e.g. 200"
                                     style="flex:1;background:var(--background-dark);border:1px solid var(--border-light);border-radius:8px;color:var(--text-primary);padding:10px 12px">
-                                <span id="recipeUnit" style="color:var(--accent-gold);font-weight:600;min-width:30px">—</span>
+                                <span id="recipeUnit" style="color:var(--accent-gold);font-weight:600;min-width:30px">â€”</span>
                             </div>
                         </div>
                     </div>
                     <!-- Cost preview -->
                     <div id="recipeCostPreview" style="background:var(--background-dark);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.9rem;color:var(--text-secondary);display:none">
-                        Cost preview: <strong id="recipeCostValue" style="color:var(--accent-gold)">—</strong> per serving
+                        Cost preview: <strong id="recipeCostValue" style="color:var(--accent-gold)">â€”</strong> per serving
                     </div>
                     <div class="form-buttons">
                         <button class="btn btn-primary" onclick="RecipeManager.save()">Save</button>
@@ -591,7 +591,7 @@
             </div>
         </div>
 
-    <!-- ── P&L Report Section ─────────────────────────────── -->
+    <!-- â”€â”€ P&L Report Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <div id="profitReportSection" class="admin-section-content" style="display:none;">
 
         <!-- Header -->
@@ -613,7 +613,7 @@
             </select>
             <div id="pr_customRange" style="display:none;gap:0.75rem;align-items:center;flex-wrap:wrap;">
                 <input type="date" id="pr_from" style="background:var(--background-dark);border:1px solid var(--border-light);border-radius:8px;color:var(--text-primary);padding:8px 12px">
-                <span style="color:var(--text-secondary)">→</span>
+                <span style="color:var(--text-secondary)">â†’</span>
                 <input type="date" id="pr_to"   style="background:var(--background-dark);border:1px solid var(--border-light);border-radius:8px;color:var(--text-primary);padding:8px 12px">
                 <button class="btn btn-secondary" style="padding:8px 16px" onclick="ProfitReport.load()">Apply</button>
             </div>
@@ -624,17 +624,17 @@
         <div class="pr-kpi-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem;">
             <div class="pr-kpi-card" style="background:var(--background-light);border:1px solid var(--accent-gold);border-radius:12px;padding:1.5rem;">
                 <div style="color:var(--text-secondary);font-size:0.8rem;text-transform:uppercase;letter-spacing:0.5px">Total Revenue</div>
-                <div id="pr_revenue" class="pr-kpi-value" style="font-size:2rem;font-weight:700;color:var(--accent-gold);margin:0.3rem 0">—</div>
-                <div style="font-size:0.8rem;color:var(--text-secondary)">vs prev period: <span id="pr_revChange" style="font-weight:600">—</span></div>
+                <div id="pr_revenue" class="pr-kpi-value" style="font-size:2rem;font-weight:700;color:var(--accent-gold);margin:0.3rem 0">â€”</div>
+                <div style="font-size:0.8rem;color:var(--text-secondary)">vs prev period: <span id="pr_revChange" style="font-weight:600">â€”</span></div>
             </div>
             <div class="pr-kpi-card" style="background:var(--background-light);border:1px solid var(--border-light);border-radius:12px;padding:1.5rem;">
                 <div style="color:var(--text-secondary);font-size:0.8rem;text-transform:uppercase;letter-spacing:0.5px">Total Orders</div>
-                <div id="pr_orders" class="pr-kpi-value" style="font-size:2rem;font-weight:700;color:var(--text-primary);margin:0.3rem 0">—</div>
-                <div style="font-size:0.8rem;color:var(--text-secondary)">vs prev: <span id="pr_ordersChange" style="font-weight:600">—</span></div>
+                <div id="pr_orders" class="pr-kpi-value" style="font-size:2rem;font-weight:700;color:var(--text-primary);margin:0.3rem 0">â€”</div>
+                <div style="font-size:0.8rem;color:var(--text-secondary)">vs prev: <span id="pr_ordersChange" style="font-weight:600">â€”</span></div>
             </div>
             <div class="pr-kpi-card" style="background:var(--background-light);border:1px solid var(--border-light);border-radius:12px;padding:1.5rem;">
                 <div style="color:var(--text-secondary);font-size:0.8rem;text-transform:uppercase;letter-spacing:0.5px">Avg Order Value</div>
-                <div id="pr_avgOrder" class="pr-kpi-value" style="font-size:2rem;font-weight:700;color:var(--text-primary);margin:0.3rem 0">—</div>
+                <div id="pr_avgOrder" class="pr-kpi-value" style="font-size:2rem;font-weight:700;color:var(--text-primary);margin:0.3rem 0">â€”</div>
             </div>
         </div>
 
@@ -643,17 +643,17 @@
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem;">
             <div style="background:var(--background-light);border:1px solid #e74c3c33;border-radius:12px;padding:1.5rem;">
                 <div style="color:var(--text-secondary);font-size:0.8rem;text-transform:uppercase;letter-spacing:0.5px">Cost of Goods (COGS)</div>
-                <div id="pr_cogs" style="font-size:2rem;font-weight:700;color:#e74c3c;margin:0.3rem 0">—</div>
+                <div id="pr_cogs" style="font-size:2rem;font-weight:700;color:#e74c3c;margin:0.3rem 0">â€”</div>
                 <div style="font-size:0.8rem;color:var(--text-secondary)">ingredient costs</div>
             </div>
             <div style="background:var(--background-light);border:1px solid #4caf5033;border-radius:12px;padding:1.5rem;">
                 <div style="color:var(--text-secondary);font-size:0.8rem;text-transform:uppercase;letter-spacing:0.5px">Gross Profit</div>
-                <div id="pr_grossProfit" style="font-size:2rem;font-weight:700;color:#4caf50;margin:0.3rem 0">—</div>
-                <div style="font-size:0.8rem;color:var(--text-secondary)">Margin: <span id="pr_grossMargin">—</span></div>
+                <div id="pr_grossProfit" style="font-size:2rem;font-weight:700;color:#4caf50;margin:0.3rem 0">â€”</div>
+                <div style="font-size:0.8rem;color:var(--text-secondary)">Margin: <span id="pr_grossMargin">â€”</span></div>
             </div>
             <div style="background:var(--background-light);border:1px solid var(--border-light);border-radius:12px;padding:1.5rem;">
                 <div style="color:var(--text-secondary);font-size:0.8rem;text-transform:uppercase;letter-spacing:0.5px">Operating Expenses</div>
-                <div id="pr_expenses" style="font-size:2rem;font-weight:700;color:#f39c12;margin:0.3rem 0">—</div>
+                <div id="pr_expenses" style="font-size:2rem;font-weight:700;color:#f39c12;margin:0.3rem 0">â€”</div>
                 <div style="font-size:0.8rem;color:var(--text-secondary)">rent, salary, etc.</div>
             </div>
         </div>
@@ -662,11 +662,11 @@
         <div style="background:linear-gradient(135deg,#1a2a1a,#243024);border:2px solid #4caf5066;border-radius:12px;padding:1.5rem 2rem;margin-bottom:1.5rem;display:flex;justify-content:space-between;align-items:center;">
             <div>
                 <div style="color:#a0a0a0;font-size:0.85rem;text-transform:uppercase;letter-spacing:1px">Net Profit (after all expenses)</div>
-                <div id="pr_netProfit" style="font-size:2.5rem;font-weight:700;color:#4caf50;margin-top:0.25rem">—</div>
+                <div id="pr_netProfit" style="font-size:2.5rem;font-weight:700;color:#4caf50;margin-top:0.25rem">â€”</div>
             </div>
             <div style="text-align:right">
                 <div style="color:#a0a0a0;font-size:0.85rem">Net Margin</div>
-                <div id="pr_netMargin" style="font-size:1.8rem;font-weight:700;color:#4caf50">—</div>
+                <div id="pr_netMargin" style="font-size:1.8rem;font-weight:700;color:#4caf50">â€”</div>
             </div>
         </div>
 

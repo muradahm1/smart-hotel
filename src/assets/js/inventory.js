@@ -92,6 +92,9 @@ function renderIngredients(items) {
                 <button class="btn btn-outline btn-sm" onclick="openWasteModal('${item.id}','${item.name}','${item.base_unit}')">
                     <i class="fas fa-trash-alt"></i> Log Waste
                 </button>
+                <button class="btn btn-outline btn-sm" onclick="openEditIngredientModal('${item.id}','${item.name}',${item.cost_per_unit},'${item.base_unit}')">
+                    <i class="fas fa-edit"></i> Edit Cost
+                </button>
                 <button class="btn btn-danger btn-sm" onclick="deleteIngredient('${item.id}')">
                     <i class="fas fa-times"></i>
                 </button>
@@ -278,6 +281,75 @@ window.submitStockModal = async function () {
         loadInventoryDashboard();
     } catch (err) {
         showNotification('Error: ' + err.message, 'error');
+    }
+};
+
+// ── Edit Ingredient Cost Modal ───────────────────────────────
+
+window.openEditIngredientModal = function (id, name, currentCost, unit) {
+    // Inject modal if not already present
+    if (!document.getElementById('editIngModal')) {
+        document.body.insertAdjacentHTML('beforeend', `
+        <div id="editIngModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;">
+            <div style="background:var(--background-light);border-radius:16px;padding:2rem;width:100%;max-width:420px;border:1px solid var(--border-light);">
+                <h3 style="color:var(--accent-gold);margin-bottom:1.2rem">Edit Ingredient</h3>
+                <input type="hidden" id="editIngId">
+                <div class="form-group" style="margin-bottom:1rem">
+                    <label style="color:var(--text-secondary);font-size:0.85rem;display:block;margin-bottom:4px">Name</label>
+                    <input type="text" id="editIngName"
+                        style="width:100%;background:var(--background-dark);border:1px solid var(--border-light);border-radius:8px;color:var(--text-primary);padding:9px 12px">
+                </div>
+                <div class="form-group" style="margin-bottom:1.5rem">
+                    <label style="color:var(--text-secondary);font-size:0.85rem;display:block;margin-bottom:4px">Cost per <span id="editIngUnitLabel">unit</span></label>
+                    <input type="number" id="editIngCost" step="0.0001" min="0" placeholder="0.0000"
+                        style="width:100%;background:var(--background-dark);border:1px solid var(--border-light);border-radius:8px;color:var(--text-primary);padding:9px 12px">
+                    <small style="color:var(--text-secondary);font-size:0.78rem;margin-top:4px;display:block">
+                        Updating this will immediately affect COGS &amp; profit calculations.
+                    </small>
+                </div>
+                <div class="form-buttons">
+                    <button class="btn btn-primary" onclick="submitEditIngModal()">Save Changes</button>
+                    <button class="btn btn-secondary" onclick="closeEditIngModal()">Cancel</button>
+                </div>
+            </div>
+        </div>`);
+    }
+
+    document.getElementById('editIngId').value       = id;
+    document.getElementById('editIngName').value     = name;
+    document.getElementById('editIngCost').value     = currentCost;
+    document.getElementById('editIngUnitLabel').textContent = unit;
+    document.getElementById('editIngModal').style.display = 'flex';
+};
+
+window.closeEditIngModal = function () {
+    document.getElementById('editIngModal').style.display = 'none';
+};
+
+window.submitEditIngModal = async function () {
+    const session = await getSession();
+    if (!session) { showNotification('You must be logged in', 'error'); return; }
+
+    const id   = document.getElementById('editIngId').value;
+    const name = document.getElementById('editIngName').value.trim();
+    const cost = parseFloat(document.getElementById('editIngCost').value);
+
+    if (!name || isNaN(cost) || cost < 0) {
+        showNotification('Enter a valid name and cost', 'error');
+        return;
+    }
+
+    try {
+        const { error } = await window.supabaseClient
+            .from('ingredients')
+            .update({ name, cost_per_unit: cost })
+            .eq('id', id);
+        if (error) throw error;
+        showNotification('Ingredient updated — COGS recalculated automatically', 'success');
+        closeEditIngModal();
+        loadInventoryDashboard();
+    } catch (err) {
+        showNotification('Update failed: ' + err.message, 'error');
     }
 };
 
